@@ -232,11 +232,17 @@
       }
     }
 
-    window.addEventListener("DOMContentLoaded", () => {
+    function checkAdminAuthOnInit() {
       if (sessionStorage.getItem("admin_auth") === "true") {
         showAdminView();
       }
-    });
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", checkAdminAuthOnInit);
+    } else {
+      checkAdminAuthOnInit();
+    }
 
     function showAdminView() {
       document.getElementById("pinView").style.display = "none";
