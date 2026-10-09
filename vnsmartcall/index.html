@@ -443,12 +443,207 @@
     .token-section { background: #f1f5f9; border-radius: 12px; padding: 12px 14px; margin-bottom: 20px; font-size: 12px; color: #475569; }
     .token-section a { color: var(--primary); text-decoration: none; }
   
-</style>
+
+    /* TOP HEADER & UPLOAD BUTTON */
+    .top-header-bar {
+      width: 100%;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .btn-header-upload {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      background: #ffffff;
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      text-decoration: none;
+    }
+
+    .btn-header-upload:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+      transform: translateY(-1px);
+    }
+
+    .btn-header-upload svg {
+      width: 16px;
+      height: 16px;
+      color: var(--primary);
+    }
+
+    /* PIN MODAL */
+    .pin-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 16px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .pin-modal-backdrop.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .pin-modal-card {
+      background: #ffffff;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 360px;
+      padding: 24px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      transform: scale(0.95);
+      transition: transform 0.2s ease;
+      animation: pinModalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes pinModalPop {
+      to { transform: scale(1); }
+    }
+
+    .pin-modal-icon {
+      width: 48px;
+      height: 48px;
+      background: #eff6ff;
+      color: var(--primary);
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 12px;
+    }
+
+    .pin-modal-card h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .pin-modal-card p {
+      font-size: 13px;
+      color: var(--text-sub);
+      margin-bottom: 18px;
+      line-height: 1.4;
+    }
+
+    .pin-input {
+      width: 100%;
+      max-width: 200px;
+      height: 48px;
+      letter-spacing: 12px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: 700;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: #f8fafc;
+      outline: none;
+      transition: border-color 0.2s ease;
+      margin: 0 auto 12px auto;
+      display: block;
+    }
+
+    .pin-input:focus {
+      border-color: var(--primary);
+      background: #ffffff;
+    }
+
+    .pin-error-msg {
+      font-size: 12px;
+      color: #ef4444;
+      min-height: 18px;
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+
+    .pin-lock-box {
+      background: #fef2f2;
+      border: 1px solid #fee2e2;
+      color: #991b1b;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .pin-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .pin-btn-cancel, .pin-btn-submit {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .pin-btn-cancel {
+      background: #f1f5f9;
+      color: var(--text-sub);
+    }
+
+    .pin-btn-cancel:hover {
+      background: #e2e8f0;
+      color: var(--text-main);
+    }
+
+    .pin-btn-submit {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .pin-btn-submit:hover {
+      background: var(--primary-hover);
+    }
+
+    .pin-btn-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+  </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
 
   <div class="container">
+    <!-- TOP HEADER BAR WITH UPLOAD BUTTON -->
+    <div class="top-header-bar">
+      <button type="button" id="headerUploadBtn" class="btn-header-upload" title="Tải lên ứng dụng mới">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+        </svg>
+        <span>Upload</span>
+      </button>
+    </div>
+
     
     <!-- MÀN HÌNH 1: TẤT CẢ ỨNG DỤNG (HUB VIEW - TẠI DOMAIN MẶC ĐỊNH /) -->
     <div id="hubView" style="display: none;">
@@ -1234,6 +1429,150 @@
     document.addEventListener("DOMContentLoaded", initPage);
 
 
+  
+    /* --- LOGIC XÁC THỰC MÃ PIN & KHÓA 24H KHI SAI 5 LẦN --- */
+    (function initPinProtection() {
+      const CORRECT_PIN = "686868"; // Mã PIN bảo mật mặc định
+      const MAX_ATTEMPTS = 5;
+      const LOCK_DURATION_MS = 24 * 60 * 60 * 1000; // 24 giờ
+
+      const uploadBtn = document.getElementById("headerUploadBtn");
+      const modal = document.getElementById("pinModalBackdrop");
+      const pinInput = document.getElementById("pinInput");
+      const pinErrorMsg = document.getElementById("pinErrorMsg");
+      const pinLockBox = document.getElementById("pinLockBox");
+      const pinFormArea = document.getElementById("pinFormArea");
+      const pinCancelBtn = document.getElementById("pinCancelBtn");
+      const pinSubmitBtn = document.getElementById("pinSubmitBtn");
+
+      if (!uploadBtn || !modal) return;
+
+      function getLockInfo() {
+        const lockUntil = parseInt(localStorage.getItem("upload_pin_lock_until") || "0", 10);
+        const attempts = parseInt(localStorage.getItem("upload_pin_attempts") || "0", 10);
+        const now = Date.now();
+        if (lockUntil > now) {
+          return { isLocked: true, remainingMs: lockUntil - now, attempts };
+        }
+        if (lockUntil && lockUntil <= now) {
+          // Hết thời gian khoá 24h -> tự động mở lại
+          localStorage.removeItem("upload_pin_lock_until");
+          localStorage.setItem("upload_pin_attempts", "0");
+          return { isLocked: false, remainingMs: 0, attempts: 0 };
+        }
+        return { isLocked: false, remainingMs: 0, attempts };
+      }
+
+      function formatRemainingTime(ms) {
+        const hours = Math.floor(ms / (1000 * 60 * 60));
+        const mins = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+        return `${hours} giờ ${mins} phút`;
+      }
+
+      function updateModalState() {
+        const { isLocked, remainingMs, attempts } = getLockInfo();
+        if (isLocked) {
+          pinLockBox.style.display = "block";
+          pinLockBox.innerHTML = `⚠️ <strong>Đã bị tạm khóa!</strong><br>Bạn đã nhập sai quá ${MAX_ATTEMPTS} lần.<br>Vui lòng thử lại sau <strong>${formatRemainingTime(remainingMs)}</strong>.`;
+          pinFormArea.style.display = "none";
+        } else {
+          pinLockBox.style.display = "none";
+          pinFormArea.style.display = "block";
+          pinInput.value = "";
+          const left = MAX_ATTEMPTS - attempts;
+          if (attempts > 0) {
+            pinErrorMsg.textContent = `Sai mã PIN. Bạn còn ${left} lần thử!`;
+          } else {
+            pinErrorMsg.textContent = "";
+          }
+        }
+      }
+
+      function openModal() {
+        modal.classList.add("active");
+        updateModalState();
+        const { isLocked } = getLockInfo();
+        if (!isLocked) {
+          setTimeout(() => pinInput.focus(), 100);
+        }
+      }
+
+      function closeModal() {
+        modal.classList.remove("active");
+        pinInput.value = "";
+        pinErrorMsg.textContent = "";
+      }
+
+      function handleVerifyPin() {
+        const { isLocked } = getLockInfo();
+        if (isLocked) return;
+
+        const entered = pinInput.value.trim();
+        if (!entered) {
+          pinErrorMsg.textContent = "Vui lòng nhập mã PIN!";
+          return;
+        }
+
+        if (entered === CORRECT_PIN) {
+          // ĐÚNG MÃ PIN: reset lần sai và chuyển hướng vào /admin
+          localStorage.setItem("upload_pin_attempts", "0");
+          localStorage.removeItem("upload_pin_lock_until");
+          closeModal();
+          window.location.href = "/admin";
+        } else {
+          // SAI MÃ PIN
+          let attempts = parseInt(localStorage.getItem("upload_pin_attempts") || "0", 10) + 1;
+          localStorage.setItem("upload_pin_attempts", attempts.toString());
+
+          if (attempts >= MAX_ATTEMPTS) {
+            const lockUntil = Date.now() + LOCK_DURATION_MS;
+            localStorage.setItem("upload_pin_lock_until", lockUntil.toString());
+            updateModalState();
+          } else {
+            const left = MAX_ATTEMPTS - attempts;
+            pinErrorMsg.textContent = `Mã PIN không đúng! Còn ${left} lần thử.`;
+            pinInput.value = "";
+            pinInput.focus();
+          }
+        }
+      }
+
+      uploadBtn.addEventListener("click", openModal);
+      pinCancelBtn.addEventListener("click", closeModal);
+      pinSubmitBtn.addEventListener("click", handleVerifyPin);
+
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) closeModal();
+      });
+
+      pinInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") handleVerifyPin();
+        if (e.key === "Escape") closeModal();
+      });
+    })();
+
   </script>
+
+  <!-- PIN VERIFICATION MODAL -->
+  <div id="pinModalBackdrop" class="pin-modal-backdrop">
+    <div class="pin-modal-card">
+      <div class="pin-modal-icon">🔒</div>
+      <h3>Mã PIN Bảo Mật</h3>
+      <p id="pinSubText">Nhập mã PIN để truy cập trang quản trị và upload ứng dụng</p>
+
+      <div id="pinLockBox" class="pin-lock-box" style="display: none;"></div>
+
+      <div id="pinFormArea">
+        <input type="password" id="pinInput" class="pin-input" maxlength="6" inputmode="numeric" placeholder="••••" autocomplete="off">
+        <div id="pinErrorMsg" class="pin-error-msg"></div>
+
+        <div class="pin-actions">
+          <button type="button" id="pinCancelBtn" class="pin-btn-cancel">Hủy</button>
+          <button type="button" id="pinSubmitBtn" class="pin-btn-submit">Xác nhận</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
