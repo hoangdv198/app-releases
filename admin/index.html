@@ -200,6 +200,7 @@
     const CORRECT_PIN = "686868";
     const GITHUB_REPO = "hoangdv198/app-releases";
     let selectedFile = null;
+    let formInited = false;
 
     // PIN LOGIC
     const pinInputs = document.querySelectorAll(".pin-input");
@@ -231,9 +232,11 @@
       }
     }
 
-    if (sessionStorage.getItem("admin_auth") === "true") {
-      showAdminView();
-    }
+    window.addEventListener("DOMContentLoaded", () => {
+      if (sessionStorage.getItem("admin_auth") === "true") {
+        showAdminView();
+      }
+    });
 
     function showAdminView() {
       document.getElementById("pinView").style.display = "none";
@@ -345,7 +348,6 @@
     }
 
     // FORM LOGIC
-    let formInited = false;
     function initAdminForm() {
       if (formInited) return;
       formInited = true;
