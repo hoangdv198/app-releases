@@ -218,14 +218,53 @@
       });
     });
 
+    function getLockInfo() {
+      const lockUntil = parseInt(localStorage.getItem("upload_pin_lock_until") || "0", 10);
+      const attempts = parseInt(localStorage.getItem("upload_pin_attempts") || "0", 10);
+      const now = Date.now();
+      if (lockUntil > now) {
+        return { isLocked: true, remainingMs: lockUntil - now, attempts };
+      }
+      if (lockUntil && lockUntil <= now) {
+        localStorage.removeItem("upload_pin_lock_until");
+        localStorage.setItem("upload_pin_attempts", "0");
+        return { isLocked: false, remainingMs: 0, attempts: 0 };
+      }
+      return { isLocked: false, remainingMs: 0, attempts };
+    }
+
+    function formatRemainingTime(ms) {
+      const hours = Math.floor(ms / (1000 * 60 * 60));
+      const mins = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+      return `${hours} giờ ${mins} phút`;
+    }
+
     function checkPin() {
+      const { isLocked, remainingMs } = getLockInfo();
+      const errEl = document.getElementById("pinError");
+      if (isLocked) {
+        errEl.innerHTML = `⚠️ Đã bị khóa do sai quá 5 lần. Vui lòng thử lại sau <strong>${formatRemainingTime(remainingMs)}</strong>.`;
+        errEl.style.display = "block";
+        return;
+      }
+
       const enteredPin = Array.from(pinInputs).map(i => i.value).join("");
       if (enteredPin.length === 6) {
         if (enteredPin === CORRECT_PIN) {
+          localStorage.setItem("upload_pin_attempts", "0");
+          localStorage.removeItem("upload_pin_lock_until");
           sessionStorage.setItem("admin_auth", "true");
           showAdminView();
         } else {
-          document.getElementById("pinError").style.display = "block";
+          let attempts = parseInt(localStorage.getItem("upload_pin_attempts") || "0", 10) + 1;
+          localStorage.setItem("upload_pin_attempts", attempts.toString());
+          if (attempts >= 5) {
+            localStorage.setItem("upload_pin_lock_until", (Date.now() + 24*60*60*1000).toString());
+            errEl.innerHTML = `⚠️ Đã bị khóa 24 giờ do nhập sai quá 5 lần!`;
+          } else {
+            errEl.textContent = `Mã PIN không đúng! Còn ${5 - attempts} lần thử.`;
+          }
+          errEl.style.display = "block";
           pinInputs.forEach(i => i.value = "");
           pinInputs[0].focus();
         }

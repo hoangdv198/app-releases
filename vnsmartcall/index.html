@@ -1518,6 +1518,7 @@
           localStorage.setItem("upload_pin_attempts", "0");
           localStorage.removeItem("upload_pin_lock_until");
           closeModal();
+          sessionStorage.setItem("admin_auth", "true");
           window.location.href = "/admin";
         } else {
           // SAI MÃ PIN
