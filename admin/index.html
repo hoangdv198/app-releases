@@ -3,403 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title id="pageTitle">Kho Ứng Dụng Android</title>
-  <meta name="description" content="Kho ứng dụng Android - Tải ứng dụng APK nội bộ phiên bản mới nhất, an toàn và nhanh chóng.">
-  <meta property="og:title" content="Kho Ứng Dụng Android">
-  <meta property="og:description" content="Kho ứng dụng Android - Tải ứng dụng APK nội bộ phiên bản mới nhất, an toàn và nhanh chóng.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://app-releases.vercel.app/">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📱</text></svg>">
+  <title>Quản Trị Phát Hành Ứng Dụng</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
-    :root {
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --text-main: #0f172a;
-      --text-sub: #64748b;
-      --border: #e2e8f0;
-      --gradient: linear-gradient(135deg, #1e40af, #3b82f6);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      background-color: var(--bg);
-      color: var(--text-main);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 24px 16px;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 520px;
-      margin: auto 0;
-    }
-
-    /* HUB VIEW (DANH SÁCH TẤT CẢ APP) */
-    .hub-header {
-      text-align: center;
-      margin-bottom: 24px;
-    }
-
-    .hub-header h1 {
-      font-size: 26px;
-      font-weight: 800;
-      color: var(--text-main);
-      margin-bottom: 6px;
-    }
-
-    .hub-header p {
-      font-size: 14px;
-      color: var(--text-sub);
-    }
-
-    .app-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .hub-card {
-      background: var(--card-bg);
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      padding: 20px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-      transition: all 0.2s ease;
-      text-decoration: none;
-      color: inherit;
-    }
-
-    .hub-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-      border-color: #cbd5e1;
-    }
-
-    .hub-card-icon {
-      width: 64px;
-      height: 64px;
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 24px;
-      font-weight: 800;
-      flex-shrink: 0;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
-    .hub-card-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .hub-card-name {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text-main);
-      margin-bottom: 4px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .hub-card-desc {
-      font-size: 13px;
-      color: var(--text-sub);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      margin-bottom: 8px;
-    }
-
-    .hub-card-meta {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .hub-badge {
-      font-size: 11px;
-      font-weight: 600;
-      padding: 3px 8px;
-      border-radius: 12px;
-      background: #f1f5f9;
-      color: #475569;
-    }
-
-    .hub-badge.ver {
-      background: #eff6ff;
-      color: #1d4ed8;
-    }
-
-    .hub-card-action {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      color: var(--text-sub);
-      flex-shrink: 0;
-    }
-
-    .hub-card:hover .hub-card-action {
-      background: var(--primary);
-      color: white;
-      border-color: var(--primary);
-    }
-
-    /* SINGLE APP DETAIL VIEW */
-    .card {
-      background: var(--card-bg);
-      border-radius: 24px;
-      border: 1px solid var(--border);
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
-      padding: 32px 24px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .card::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 6px;
-      background: var(--gradient);
-    }
-
-    .back-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-sub);
-      text-decoration: none;
-      margin-bottom: 16px;
-      padding: 6px 12px;
-      border-radius: 8px;
-      background: #f1f5f9;
-      transition: all 0.2s;
-    }
-
-    .back-btn:hover {
-      color: var(--text-main);
-      background: #e2e8f0;
-    }
-
-    .app-icon {
-      width: 88px;
-      height: 88px;
-      border-radius: 20px;
-      margin: 0 auto 16px;
-      background: var(--gradient);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 8px 16px rgba(37, 99, 235, 0.2);
-      color: white;
-      font-size: 34px;
-      font-weight: 800;
-      letter-spacing: -1px;
-    }
-
-    .app-title {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--text-main);
-      margin-bottom: 6px;
-    }
-
-    .app-subtitle {
-      font-size: 14px;
-      color: var(--text-sub);
-      margin-bottom: 20px;
-    }
-
-    .meta-badges {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 24px;
-    }
-
-    .badge {
-      background: #f1f5f9;
-      color: #334155;
-      font-size: 12px;
-      font-weight: 600;
-      padding: 6px 12px;
-      border-radius: 20px;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .badge.version {
-      background: #eff6ff;
-      color: #1d4ed8;
-      border: 1px solid #bfdbfe;
-    }
-
-    .badge.size {
-      background: #f0fdf4;
-      color: #15803d;
-      border: 1px solid #bbf7d0;
-    }
-
-    .btn-download {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      width: 100%;
-      background: var(--primary);
-      color: white;
-      text-decoration: none;
-      font-size: 16px;
-      font-weight: 600;
-      padding: 15px 20px;
-      border-radius: 14px;
-      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
-      transition: all 0.2s ease;
-      cursor: pointer;
-      border: none;
-    }
-
-    .btn-download:hover {
-      background: var(--primary-hover);
-      transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.4);
-    }
-
-    .btn-download:active {
-      transform: translateY(1px);
-    }
-
-    .btn-download svg {
-      width: 20px;
-      height: 20px;
-    }
-
-    .changelog-box {
-      margin-top: 24px;
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 16px;
-      text-align: left;
-      font-size: 13px;
-    }
-
-    .changelog-title {
-      font-weight: 600;
-      color: var(--text-main);
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .changelog-content {
-      color: var(--text-sub);
-      line-height: 1.5;
-      white-space: pre-line;
-      max-height: 120px;
-      overflow-y: auto;
-    }
-
-    .qr-section {
-      margin-top: 24px;
-      padding-top: 20px;
-      border-top: 1px dashed var(--border);
-      display: none;
-    }
-
-    @media (min-width: 640px) {
-      .qr-section {
-        display: block;
-      }
-    }
-
-    .qr-title {
-      font-size: 13px;
-      color: var(--text-sub);
-      margin-bottom: 12px;
-    }
-
-    .qr-image {
-      width: 140px;
-      height: 140px;
-      margin: 0 auto;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      padding: 6px;
-      background: white;
-    }
-
-    .instructions {
-      margin-top: 24px;
-      text-align: left;
-      background: #fffbeb;
-      border: 1px solid #fef3c7;
-      border-radius: 12px;
-      padding: 14px 16px;
-      font-size: 12px;
-      color: #92400e;
-      line-height: 1.6;
-    }
-
-    .instructions strong {
-      color: #78350f;
-    }
-
-    .instructions ol {
-      margin-left: 18px;
-      margin-top: 4px;
-    }
-
-    footer {
-      margin-top: 24px;
-      font-size: 12px;
-      color: #94a3b8;
-      text-align: center;
-    }
-
-    .loading-pulse {
-      animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: .4; }
-    }
-  
-/* ADMIN STYLES */
-
     :root {
       --primary: #2563eb;
       --primary-hover: #1d4ed8;
@@ -442,82 +49,13 @@
 
     .token-section { background: #f1f5f9; border-radius: 12px; padding: 12px 14px; margin-bottom: 20px; font-size: 12px; color: #475569; }
     .token-section a { color: var(--primary); text-decoration: none; }
-  
-</style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    footer { margin-top: 24px; font-size: 12px; color: #94a3b8; text-align: center; }
+  </style>
 </head>
 <body>
 
   <div class="container">
-    
-    <!-- MÀN HÌNH 1: TẤT CẢ ỨNG DỤNG (HUB VIEW - TẠI DOMAIN MẶC ĐỊNH /) -->
-    <div id="hubView" style="display: none;">
-      <div class="hub-header">
-        <h1>Kho Ứng Dụng Android</h1>
-        <p>Chọn ứng dụng bên dưới để tải về phiên bản mới nhất cho Android</p>
-      </div>
-      <div class="app-grid" id="appGrid">
-        <!-- Tự động sinh danh sách app từ config -->
-      </div>
-    </div>
-
-    <!-- MÀN HÌNH 2: TRANG CHI TIẾT TẢI CỦA TỪNG APP (VÍ DỤ /mydts, /vnsmartcall) -->
-    <div id="singleAppView" style="display: none;">
-      <div class="card" id="mainCard">
-        <div style="text-align: left;">
-          <a href="/" class="back-btn">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
-            Tất cả ứng dụng
-          </a>
-        </div>
-
-        <div class="app-icon" id="appIcon">DTS</div>
-        <h1 class="app-title" id="appTitle">myDTS</h1>
-        <p class="app-subtitle" id="appSubtitle">Ứng dụng quản lý & làm việc nội bộ</p>
-
-        <div class="meta-badges">
-          <span class="badge version" id="versionBadge">
-            <span class="loading-pulse">Đang tải...</span>
-          </span>
-          <span class="badge size" id="sizeBadge" style="display: none;">34.4 MB</span>
-          <span class="badge" id="dateBadge" style="display: none;">Cập nhật mới</span>
-        </div>
-
-        <a id="downloadBtn" href="#" class="btn-download" download>
-          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-          </svg>
-          <span>Tải về file APK</span>
-        </a>
-
-        <div class="changelog-box" id="changelogBox" style="display: none;">
-          <div class="changelog-title">
-            <span>✨</span> Có gì mới trong bản này:
-          </div>
-          <div class="changelog-content" id="changelogContent"></div>
-        </div>
-
-        <div class="instructions">
-          <strong>💡 Hướng dẫn cài đặt file APK trên Android:</strong>
-          <ol>
-            <li>Bấm <strong>"Tải về file APK"</strong> phía trên.</li>
-            <li>Khi trình duyệt hỏi <em>"Tệp này có thể gây hại..."</em>, chọn <strong>Vẫn tải xuống</strong>.</li>
-            <li>Mở file vừa tải về và chọn <strong>Cài đặt</strong> (bật <em>"Cho phép từ nguồn này"</em> nếu được yêu cầu).</li>
-          </ol>
-        </div>
-
-        <div class="qr-section">
-          <div class="qr-title">Quét mã QR bằng điện thoại để tải nhanh:</div>
-          <img id="qrCode" class="qr-image" src="" alt="QR Code Tải App">
-        </div>
-      </div>
-    </div>
-
-    
-    <!-- MÀN HÌNH 3: TRANG QUẢN TRỊ ADMIN (/admin) -->
-    <div id="adminContainer" style="display: none;">
-      <div class="card">
-        
+    <div class="card">
       
       <!-- STEP 1: NHẬP MÃ PIN 686868 -->
       <div id="pinView">
@@ -567,6 +105,7 @@
         <div id="fileInfoBox" style="display: none; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 12px; margin-bottom: 16px; font-size: 13px; text-align: left;">
           <div>📄 <strong>Tên file:</strong> <span id="infoFileName"></span></div>
           <div>⚖️ <strong>Dung lượng:</strong> <span id="infoFileSize"></span></div>
+          <div id="metaStatus" style="margin-top: 6px;"></div>
         </div>
 
         <div class="form-group">
@@ -611,224 +150,19 @@
         <div class="status-msg" id="statusMsg"></div>
       </div>
 
-    
-      </div>
     </div>
-
     <footer>
       &copy; 2026 App Distribution Hub &bull; Powered by GitHub Releases
     </footer>
   </div>
 
   <script>
-    const GITHUB_REPO = "hoangdv198/app-releases";
-
-    // DANH SÁCH TẤT CẢ ỨNG DỤNG
-    const APPS_CONFIG = {
-      "mydts": {
-        slug: "mydts",
-        name: "myDTS",
-        subtitle: "Ứng dụng quản lý & làm việc nội bộ",
-        iconText: "DTS",
-        tagPrefix: "mydts",
-        apkPattern: ["mydts", "app-release"],
-        themeColor: "#2563eb",
-        gradient: "linear-gradient(135deg, #1e40af, #3b82f6)"
-      },
-      "vnsmartcall": {
-        slug: "vnsmartcall",
-        name: "VNSmartCall",
-        subtitle: "Ứng dụng tổng đài & gọi điện thông minh",
-        iconText: "VNS",
-        tagPrefix: "vnsmartcall",
-        apkPattern: ["vnsmartcall", "smartcall"],
-        themeColor: "#0284c7",
-        gradient: "linear-gradient(135deg, #0369a1, #38bdf8)"
-      }
-    };
-
-    let cachedReleases = null;
-
-    async function getReleases() {
-      if (cachedReleases) return cachedReleases;
-      try {
-        const resp = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases`);
-        if (resp.ok) {
-          cachedReleases = await resp.json();
-          return cachedReleases;
-        }
-      } catch (e) {
-        console.warn("Lỗi fetch releases:", e);
-      }
-      return [];
-    }
-
-    function findReleaseForApp(releases, appConf) {
-      if (!Array.isArray(releases) || releases.length === 0) return null;
-      
-      // Tìm release khớp tagPrefix hoặc có asset khớp apkPattern
-      let target = releases.find(r => {
-        const tag = (r.tag_name || "").toLowerCase();
-        const title = (r.name || "").toLowerCase();
-        if (tag.includes(appConf.tagPrefix) || title.includes(appConf.tagPrefix)) return true;
-        return (r.assets || []).some(a => {
-          const fName = (a.name || "").toLowerCase();
-          return fName.endsWith(".apk") && appConf.apkPattern.some(p => fName.includes(p));
-        });
-      });
-
-      return target || releases[0];
-    }
-
-    async function initPage() {
-      const path = "admin";
-
-      // NẾU VÀO TRANG ADMIN (/admin)
-      if (path === "admin") {
-        renderAdminView();
-      } else if (!path || path === "index.html") {
-        // NẾU VÀO ROOT DOMAIN (/) HOẶC INDEX.HTML: HIỆN HUB TẤT CẢ APP
-        await renderHubView();
-      } else if (APPS_CONFIG[path]) {
-        // NẾU VÀO ĐÚNG ROUTE APP CỤ THỂ (ví dụ /mydts, /vnsmartcall)
-        await renderSingleAppView(APPS_CONFIG[path]);
-      } else {
-        // Sai đường dẫn thì tự chuyển về Hub tất cả app
-        await renderHubView();
-      }
-    }
-
-    // Hiển thị danh sách tất cả các App
-    async function renderHubView() {
-      document.getElementById("pageTitle").textContent = "Trung Tâm Tải Ứng Dụng (Android APK)";
-      document.getElementById("singleAppView").style.display = "none";
-      const hubView = document.getElementById("hubView");
-      hubView.style.display = "block";
-
-      const grid = document.getElementById("appGrid");
-      grid.innerHTML = "";
-
-      const releases = await getReleases();
-
-      for (const key of Object.keys(APPS_CONFIG)) {
-        const app = APPS_CONFIG[key];
-        const rel = findReleaseForApp(releases, app);
-        
-        let ver = "Bản mới nhất";
-        let size = "";
-
-        if (rel) {
-          if (rel.tag_name) {
-            ver = rel.tag_name.replace(new RegExp(`^${app.tagPrefix}[-_]?`, "i"), "");
-          }
-          const matchedApk = (rel.assets || []).find(a => (a.name || "").toLowerCase().endsWith(".apk"));
-          if (matchedApk && matchedApk.size) {
-            size = `${(matchedApk.size / (1024 * 1024)).toFixed(1)} MB`;
-          }
-        }
-
-        const a = document.createElement("a");
-        a.className = "hub-card";
-        a.href = `/${app.slug}`;
-        a.innerHTML = `
-          <div class="hub-card-icon" style="background: ${app.gradient};">
-            ${app.iconText}
-          </div>
-          <div class="hub-card-info">
-            <div class="hub-card-name">${app.name}</div>
-            <div class="hub-card-desc">${app.subtitle}</div>
-            <div class="hub-card-meta">
-              <span class="hub-badge ver">${ver}</span>
-              ${size ? `<span class="hub-badge">${size}</span>` : ""}
-            </div>
-          </div>
-          <div class="hub-card-action">
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
-          </div>
-        `;
-        grid.appendChild(a);
-      }
-    }
-
-    // Hiển thị chi tiết 1 App
-    async function renderSingleAppView(appConf) {
-      document.getElementById("hubView").style.display = "none";
-      document.getElementById("singleAppView").style.display = "block";
-
-      document.getElementById("pageTitle").textContent = `Tải Ứng Dụng ${appConf.name} (Android APK)`;
-      document.getElementById("appTitle").textContent = appConf.name;
-      document.getElementById("appSubtitle").textContent = appConf.subtitle;
-      document.getElementById("appIcon").textContent = appConf.iconText;
-
-      document.documentElement.style.setProperty("--primary", appConf.themeColor);
-      document.documentElement.style.setProperty("--gradient", appConf.gradient);
-
-      const qrImg = document.getElementById("qrCode");
-      if (qrImg) {
-        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(window.location.href)}`;
-      }
-
-      const releases = await getReleases();
-      const targetRelease = findReleaseForApp(releases, appConf);
-
-      const versionEl = document.getElementById("versionBadge");
-      const sizeEl = document.getElementById("sizeBadge");
-      const dateEl = document.getElementById("dateBadge");
-      const btnEl = document.getElementById("downloadBtn");
-      const changelogBox = document.getElementById("changelogBox");
-      const changelogContent = document.getElementById("changelogContent");
-
-      if (targetRelease) {
-        if (targetRelease.tag_name) {
-          let displayVer = targetRelease.tag_name.replace(new RegExp(`^${appConf.tagPrefix}[-_]?`, "i"), "");
-          versionEl.textContent = `Phiên bản: ${displayVer}`;
-        }
-        if (targetRelease.published_at) {
-          const date = new Date(targetRelease.published_at);
-          dateEl.textContent = `Ngày: ${date.toLocaleDateString("vi-VN")}`;
-          dateEl.style.display = "inline-flex";
-        }
-
-        let matchedApk = (targetRelease.assets || []).find(a => {
-          const fn = (a.name || "").toLowerCase();
-          return fn.endsWith(".apk") && appConf.apkPattern.some(p => fn.includes(p));
-        }) || (targetRelease.assets || []).find(a => (a.name || "").toLowerCase().endsWith(".apk"));
-
-        if (matchedApk) {
-          btnEl.href = matchedApk.browser_download_url;
-          if (matchedApk.size) {
-            sizeEl.textContent = `${(matchedApk.size / (1024 * 1024)).toFixed(1)} MB`;
-            sizeEl.style.display = "inline-flex";
-          }
-        }
-
-        if (targetRelease.body && targetRelease.body.trim()) {
-          changelogContent.textContent = targetRelease.body.trim();
-          changelogBox.style.display = "block";
-        }
-      } else {
-        versionEl.textContent = "Bản mới nhất";
-      }
-    }
-
-    
-    function renderAdminView() {
-      document.getElementById("hubView").style.display = "none";
-      document.getElementById("singleAppView").style.display = "none";
-      document.getElementById("adminContainer").style.display = "block";
-      document.getElementById("pageTitle").textContent = "Quản Trị Phát Hành Ứng Dụng";
-      initAdminLogic();
-    }
-
-    
     const CORRECT_PIN = "686868";
-    // const GITHUB_REPO = "hoangdv198/app-releases";
+    const GITHUB_REPO = "hoangdv198/app-releases";
     let selectedFile = null;
 
     // PIN LOGIC
-    
-    function setupAdminHandlers() {
-      const pinInputs = document.querySelectorAll(".pin-input");
+    const pinInputs = document.querySelectorAll(".pin-input");
     pinInputs.forEach((input, index) => {
       input.addEventListener("input", (e) => {
         if (e.target.value.length === 1 && index < pinInputs.length - 1) {
@@ -843,15 +177,36 @@
       });
     });
 
-    
-    let adminInited = false;
-    function initAdminLogic() {
-      if (adminInited) return;
-      adminInited = true;
-      setupAdminHandlers();
+    function checkPin() {
+      const enteredPin = Array.from(pinInputs).map(i => i.value).join("");
+      if (enteredPin.length === 6) {
+        if (enteredPin === CORRECT_PIN) {
+          sessionStorage.setItem("admin_auth", "true");
+          showAdminView();
+        } else {
+          document.getElementById("pinError").style.display = "block";
+          pinInputs.forEach(i => i.value = "");
+          pinInputs[0].focus();
+        }
+      }
     }
-    
-    // HÀM PARSE BINARY ANDROID MANIFEST TRỰC TIẾP TRÊN TRÌNH DUYỆT
+
+    if (sessionStorage.getItem("admin_auth") === "true") {
+      showAdminView();
+    }
+
+    function showAdminView() {
+      document.getElementById("pinView").style.display = "none";
+      document.getElementById("adminView").style.display = "block";
+      initAdminForm();
+    }
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      sessionStorage.removeItem("admin_auth");
+      window.location.reload();
+    });
+
+    // PARSER ANDROID MANIFEST
     async function parseApkMetadata(file) {
       try {
         const zip = await JSZip.loadAsync(file);
@@ -862,7 +217,6 @@
         const dataView = new DataView(buffer);
         const uint8 = new Uint8Array(buffer);
 
-        // Header
         const strPoolChunkType = dataView.getUint16(8, true);
         const strPoolChunkSize = dataView.getUint32(12, true);
         const stringCount = dataView.getUint32(16, true);
@@ -870,7 +224,6 @@
         const isUtf8 = Boolean(flags & (1 << 8));
         const stringOffset = dataView.getUint32(28, true);
 
-        // Read string offsets
         const strOffsets = [];
         for (let i = 0; i < stringCount; i++) {
           strOffsets.push(dataView.getUint32(36 + i * 4, true));
@@ -906,12 +259,12 @@
           const hsize = dataView.getUint16(pos + 2, true);
           const csize = dataView.getUint32(pos + 4, true);
 
-          if (ctype === 0x0180) { // RESOURCE MAP
+          if (ctype === 0x0180) {
             const count = Math.floor((csize - hsize) / 4);
             for (let i = 0; i < count; i++) {
               resMap.push(dataView.getUint32(pos + hsize + i * 4, true));
             }
-          } else if (ctype === 0x0102) { // START_ELEMENT
+          } else if (ctype === 0x0102) {
             const attrStart = dataView.getUint16(pos + 24, true);
             const attrSize = dataView.getUint16(pos + 26, true);
             const attrCount = dataView.getUint16(pos + 28, true);
@@ -920,7 +273,6 @@
               const ap = pos + 16 + attrStart + i * attrSize;
               const nameIdx = dataView.getUint32(ap + 4, true);
               const rawValIdx = dataView.getUint32(ap + 8, true);
-              const valType = dataView.getUint8(ap + 15);
               const valData = dataView.getUint32(ap + 16, true);
 
               const attrName = strings[nameIdx] || "";
@@ -951,37 +303,12 @@
       }
     }
 
-    function checkPin() {
-      const enteredPin = Array.from(pinInputs).map(i => i.value).join("");
-      if (enteredPin.length === 6) {
-        if (enteredPin === CORRECT_PIN) {
-          sessionStorage.setItem("admin_auth", "true");
-          showAdminView();
-        } else {
-          document.getElementById("pinError").style.display = "block";
-          pinInputs.forEach(i => i.value = "");
-          pinInputs[0].focus();
-        }
-      }
-    }
-
-    if (sessionStorage.getItem("admin_auth") === "true") {
-      showAdminView();
-    }
-
-    function showAdminView() {
-      document.getElementById("pinView").style.display = "none";
-      document.getElementById("adminView").style.display = "block";
-      initAdminForm();
-    }
-
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-      sessionStorage.removeItem("admin_auth");
-      window.location.reload();
-    });
-
-    // ADMIN FORM & TOKEN MANAGEMENT
+    // FORM LOGIC
+    let formInited = false;
     function initAdminForm() {
+      if (formInited) return;
+      formInited = true;
+
       const tokenInput = document.getElementById("ghTokenInput");
       const saveTokenBtn = document.getElementById("saveTokenBtn");
       const tokenStatus = document.getElementById("tokenStatus");
@@ -1004,7 +331,6 @@
         }
       });
 
-      // FILE DROP ZONE
       const dropZone = document.getElementById("dropZone");
       const fileInput = document.getElementById("fileInput");
 
@@ -1014,17 +340,12 @@
       dropZone.addEventListener("drop", (e) => {
         e.preventDefault();
         dropZone.classList.remove("dragover");
-        if (e.dataTransfer.files.length > 0) {
-          handleFile(e.dataTransfer.files[0]);
-        }
+        if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
       });
       fileInput.addEventListener("change", (e) => {
-        if (e.target.files.length > 0) {
-          handleFile(e.target.files[0]);
-        }
+        if (e.target.files.length > 0) handleFile(e.target.files[0]);
       });
 
-      // APP SELECT & VERSION INPUT
       const appSelect = document.getElementById("appSelect");
       const versionInput = document.getElementById("versionInput");
 
@@ -1055,21 +376,14 @@
         document.getElementById("infoFileSize").textContent = (file.size / (1024 * 1024)).toFixed(1) + " MB";
         document.getElementById("fileInfoBox").style.display = "block";
 
-        // Quét sâu metadata từ AndroidManifest.xml bên trong file APK
-        const statusBox = document.getElementById("fileInfoBox");
-        statusBox.innerHTML = `
-          <div>📄 <strong>Tên file:</strong> ${file.name}</div>
-          <div>⚖️ <strong>Dung lượng:</strong> ${(file.size / (1024 * 1024)).toFixed(1)} MB</div>
-          <div id="metaStatus" style="color: #2563eb; margin-top: 4px;">🔍 Đang đọc AndroidManifest.xml...</div>
-        `;
+        const metaStatus = document.getElementById("metaStatus");
+        metaStatus.innerHTML = '<span style="color: #2563eb;">🔍 Đang đọc AndroidManifest.xml...</span>';
 
         const meta = await parseApkMetadata(file);
-        const metaStatus = document.getElementById("metaStatus");
-
         if (meta) {
           metaStatus.innerHTML = `
-            <div style="color: #16a34a; font-weight: 600; margin-top: 4px;">✅ Đã đọc Metadata thành công!</div>
-            <div style="margin-top: 2px;">📦 <strong>Package:</strong> ${meta.packageName || "N/A"}</div>
+            <div style="color: #16a34a; font-weight: 600;">✅ Đã đọc Metadata thành công!</div>
+            <div>📦 <strong>Package:</strong> ${meta.packageName || "N/A"}</div>
             <div>🏷️ <strong>Version Name:</strong> <span style="color: #1d4ed8; font-weight: 700;">${meta.versionName || "N/A"}</span> &nbsp;|&nbsp; <strong>Version Code:</strong> <span style="color: #1d4ed8; font-weight: 700;">${meta.versionCode || "N/A"}</span></div>
           `;
 
@@ -1077,7 +391,6 @@
             versionInput.value = meta.versionName;
           }
 
-          // Nhận diện App theo Package hoặc Label
           const pkg = (meta.packageName || "").toLowerCase();
           const lbl = (meta.appLabel || "").toLowerCase();
           if (pkg.includes("smartcall") || lbl.includes("smartcall")) {
@@ -1088,16 +401,9 @@
             appSelect.value = "poscake";
           }
         } else {
-          metaStatus.textContent = "⚠️ Không đọc được manifest nhị phân, dùng tên file làm fallback.";
-          const fLower = file.name.toLowerCase();
-          if (fLower.includes("smartcall")) appSelect.value = "vnsmartcall";
-          else if (fLower.includes("mydts") || fLower.includes("dts")) appSelect.value = "mydts";
-          else if (fLower.includes("poscake")) appSelect.value = "poscake";
-
+          metaStatus.innerHTML = '<span style="color: #ea580c;">⚠️ Dùng tên file để đoán version</span>';
           const matchVer = file.name.match(/\d+\.\d+(\.\d+)?/);
-          if (matchVer && !versionInput.value) {
-            versionInput.value = matchVer[0];
-          }
+          if (matchVer && !versionInput.value) versionInput.value = matchVer[0];
         }
 
         updateTag();
@@ -1110,16 +416,12 @@
         document.getElementById("uploadBtn").disabled = !(hasToken && hasFile && hasTag);
       }
 
-      // UPLOAD RELEASE LOGIC
       document.getElementById("uploadBtn").addEventListener("click", uploadRelease);
     }
 
     async function uploadRelease() {
       const token = localStorage.getItem("gh_pat_token");
-      if (!token) {
-        alert("Vui lòng lưu GitHub Token trước khi phát hành!");
-        return;
-      }
+      if (!token) return alert("Vui lòng lưu GitHub Token!");
 
       const uploadBtn = document.getElementById("uploadBtn");
       const statusMsg = document.getElementById("statusMsg");
@@ -1139,7 +441,6 @@
       const changelog = document.getElementById("changelogInput").value.trim();
 
       try {
-        // 1. Tạo Release trên GitHub
         const relResp = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases`, {
           method: "POST",
           headers: {
@@ -1165,11 +466,8 @@
         progressFill.style.width = "40%";
         statusMsg.textContent = `🚀 Đang tải file APK (${(selectedFile.size / (1024*1024)).toFixed(1)} MB) lên GitHub...`;
 
-        // 2. Upload Binary Asset
-        // Endpoint: relData.upload_url (format: .../assets{?name,label})
         const uploadUrl = relData.upload_url.replace(/\{(\?name,label|.*)\}/, `?name=${encodeURIComponent(selectedFile.name)}`);
 
-        // Upload trực tiếp dùng XMLHttpRequest để có % Progress
         await new Promise((resolve, reject) => {
           const xhr = new XMLHttpRequest();
           xhr.open("POST", uploadUrl);
@@ -1185,11 +483,8 @@
           };
 
           xhr.onload = () => {
-            if (xhr.status >= 200 && xhr.status < 300) {
-              resolve(xhr.response);
-            } else {
-              reject(new Error("Lỗi khi upload asset: " + xhr.statusText));
-            }
+            if (xhr.status >= 200 && xhr.status < 300) resolve(xhr.response);
+            else reject(new Error("Lỗi khi upload asset: " + xhr.statusText));
           };
 
           xhr.onerror = () => reject(new Error("Lỗi kết nối mạng khi upload"));
@@ -1210,17 +505,6 @@
         uploadBtn.disabled = false;
       }
     }
-  
-
-    
-      if (sessionStorage.getItem("admin_auth") === "true") {
-        showAdminView();
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", initPage);
-
-
   </script>
 </body>
 </html>
