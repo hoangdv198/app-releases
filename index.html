@@ -483,7 +483,7 @@
           <span class="badge" id="dateBadge" style="display: none;">Cập nhật mới</span>
         </div>
 
-        <a id="downloadBtn" href="#" class="btn-download" download>
+        <a id="downloadBtn" href="javascript:void(0)" class="btn-download">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
           </svg>
@@ -666,18 +666,18 @@
     function findReleaseForApp(releases, appConf) {
       if (!Array.isArray(releases) || releases.length === 0) return null;
       
-      // Tìm release khớp tagPrefix hoặc có asset khớp apkPattern
-      let target = releases.find(r => {
+      // Lọc các bản release thuộc về app này
+      const appReleases = releases.filter(r => {
         const tag = (r.tag_name || "").toLowerCase();
         const title = (r.name || "").toLowerCase();
-        if (tag.includes(appConf.tagPrefix) || title.includes(appConf.tagPrefix)) return true;
-        return (r.assets || []).some(a => {
-          const fName = (a.name || "").toLowerCase();
-          return fName.endsWith(".apk") && appConf.apkPattern.some(p => fName.includes(p));
-        });
+        return tag.includes(appConf.tagPrefix) || title.includes(appConf.tagPrefix);
       });
 
-      return target || releases[0];
+      // Ưu tiên bản mới nhất CÓ FILE APK
+      const withApk = appReleases.find(r => (r.assets || []).some(a => (a.name || "").toLowerCase().endsWith(".apk")));
+      if (withApk) return withApk;
+
+      return appReleases[0] || releases[0];
     }
 
     async function initPage() {
@@ -796,12 +796,23 @@
           return fn.endsWith(".apk") && appConf.apkPattern.some(p => fn.includes(p));
         }) || (targetRelease.assets || []).find(a => (a.name || "").toLowerCase().endsWith(".apk"));
 
-        if (matchedApk) {
+        if (matchedApk && matchedApk.browser_download_url) {
           btnEl.href = matchedApk.browser_download_url;
+          btnEl.setAttribute("download", matchedApk.name || "app.apk");
+          btnEl.style.opacity = "1";
+          btnEl.style.pointerEvents = "auto";
           if (matchedApk.size) {
             sizeEl.textContent = `${(matchedApk.size / (1024 * 1024)).toFixed(1)} MB`;
             sizeEl.style.display = "inline-flex";
           }
+        } else {
+          btnEl.href = "javascript:void(0)";
+          btnEl.removeAttribute("download");
+          btnEl.style.opacity = "0.6";
+          btnEl.onclick = (e) => {
+            e.preventDefault();
+            alert("Bản phát hành này chưa có file APK tải lên!");
+          };
         }
 
         if (targetRelease.body && targetRelease.body.trim()) {
