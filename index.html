@@ -444,6 +444,7 @@
     .token-section a { color: var(--primary); text-decoration: none; }
   
 </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
 
@@ -849,6 +850,107 @@
       adminInited = true;
       setupAdminHandlers();
     }
+    
+    // HÀM PARSE BINARY ANDROID MANIFEST TRỰC TIẾP TRÊN TRÌNH DUYỆT
+    async function parseApkMetadata(file) {
+      try {
+        const zip = await JSZip.loadAsync(file);
+        const manifestFile = zip.file("AndroidManifest.xml");
+        if (!manifestFile) return null;
+
+        const buffer = await manifestFile.async("arraybuffer");
+        const dataView = new DataView(buffer);
+        const uint8 = new Uint8Array(buffer);
+
+        // Header
+        const strPoolChunkType = dataView.getUint16(8, true);
+        const strPoolChunkSize = dataView.getUint32(12, true);
+        const stringCount = dataView.getUint32(16, true);
+        const flags = dataView.getUint32(24, true);
+        const isUtf8 = Boolean(flags & (1 << 8));
+        const stringOffset = dataView.getUint32(28, true);
+
+        // Read string offsets
+        const strOffsets = [];
+        for (let i = 0; i < stringCount; i++) {
+          strOffsets.push(dataView.getUint32(36 + i * 4, true));
+        }
+
+        const strStart = 8 + stringOffset;
+        const strings = [];
+        for (let i = 0; i < stringCount; i++) {
+          let p = strStart + strOffsets[i];
+          if (isUtf8) {
+            let l1 = uint8[p++];
+            if (l1 & 0x80) p++;
+            let l2 = uint8[p++];
+            if (l2 & 0x80) p++;
+            let bytes = uint8.subarray(p, p + l2);
+            strings.push(new TextDecoder("utf-8").decode(bytes));
+          } else {
+            let len = dataView.getUint16(p, true);
+            let bytes = uint8.subarray(p + 2, p + 2 + len * 2);
+            strings.push(new TextDecoder("utf-16le").decode(bytes));
+          }
+        }
+
+        let pos = 8 + strPoolChunkSize;
+        const resMap = [];
+        let versionName = null;
+        let versionCode = null;
+        let packageName = null;
+        let appLabel = null;
+
+        while (pos < buffer.byteLength) {
+          const ctype = dataView.getUint16(pos, true);
+          const hsize = dataView.getUint16(pos + 2, true);
+          const csize = dataView.getUint32(pos + 4, true);
+
+          if (ctype === 0x0180) { // RESOURCE MAP
+            const count = Math.floor((csize - hsize) / 4);
+            for (let i = 0; i < count; i++) {
+              resMap.push(dataView.getUint32(pos + hsize + i * 4, true));
+            }
+          } else if (ctype === 0x0102) { // START_ELEMENT
+            const attrStart = dataView.getUint16(pos + 24, true);
+            const attrSize = dataView.getUint16(pos + 26, true);
+            const attrCount = dataView.getUint16(pos + 28, true);
+
+            for (let i = 0; i < attrCount; i++) {
+              const ap = pos + 16 + attrStart + i * attrSize;
+              const nameIdx = dataView.getUint32(ap + 4, true);
+              const rawValIdx = dataView.getUint32(ap + 8, true);
+              const valType = dataView.getUint8(ap + 15);
+              const valData = dataView.getUint32(ap + 16, true);
+
+              const attrName = strings[nameIdx] || "";
+              const resId = resMap[nameIdx] || null;
+              const rawVal = (rawValIdx < strings.length && rawValIdx !== 0xFFFFFFFF) ? strings[rawValIdx] : null;
+
+              if (attrName === "versionName" || resId === 0x0101021c) {
+                versionName = rawVal || String(valData);
+              }
+              if (attrName === "versionCode" || resId === 0x0101021b) {
+                versionCode = valData;
+              }
+              if (attrName === "package") {
+                packageName = rawVal;
+              }
+              if (attrName === "label" && rawVal && !appLabel) {
+                appLabel = rawVal;
+              }
+            }
+          }
+          pos += csize;
+        }
+
+        return { versionName, versionCode, packageName, appLabel };
+      } catch (err) {
+        console.error("Lỗi parse APK:", err);
+        return null;
+      }
+    }
+
     function checkPin() {
       const enteredPin = Array.from(pinInputs).map(i => i.value).join("");
       if (enteredPin.length === 6) {
@@ -943,7 +1045,7 @@
         validateReady();
       }
 
-      function handleFile(file) {
+      async function handleFile(file) {
         if (!file.name.toLowerCase().endsWith(".apk")) {
           alert("Vui lòng chỉ chọn file có đuôi .apk!");
           return;
@@ -953,21 +1055,51 @@
         document.getElementById("infoFileSize").textContent = (file.size / (1024 * 1024)).toFixed(1) + " MB";
         document.getElementById("fileInfoBox").style.display = "block";
 
-        // Tự đoán tên app & version từ tên file
-        const fLower = file.name.toLowerCase();
-        if (fLower.includes("smartcall")) {
-          appSelect.value = "vnsmartcall";
-        } else if (fLower.includes("mydts") || fLower.includes("dts")) {
-          appSelect.value = "mydts";
-        } else if (fLower.includes("poscake")) {
-          appSelect.value = "poscake";
+        // Quét sâu metadata từ AndroidManifest.xml bên trong file APK
+        const statusBox = document.getElementById("fileInfoBox");
+        statusBox.innerHTML = `
+          <div>📄 <strong>Tên file:</strong> ${file.name}</div>
+          <div>⚖️ <strong>Dung lượng:</strong> ${(file.size / (1024 * 1024)).toFixed(1)} MB</div>
+          <div id="metaStatus" style="color: #2563eb; margin-top: 4px;">🔍 Đang đọc AndroidManifest.xml...</div>
+        `;
+
+        const meta = await parseApkMetadata(file);
+        const metaStatus = document.getElementById("metaStatus");
+
+        if (meta) {
+          metaStatus.innerHTML = `
+            <div style="color: #16a34a; font-weight: 600; margin-top: 4px;">✅ Đã đọc Metadata thành công!</div>
+            <div style="margin-top: 2px;">📦 <strong>Package:</strong> ${meta.packageName || "N/A"}</div>
+            <div>🏷️ <strong>Version Name:</strong> <span style="color: #1d4ed8; font-weight: 700;">${meta.versionName || "N/A"}</span> &nbsp;|&nbsp; <strong>Version Code:</strong> <span style="color: #1d4ed8; font-weight: 700;">${meta.versionCode || "N/A"}</span></div>
+          `;
+
+          if (meta.versionName) {
+            versionInput.value = meta.versionName;
+          }
+
+          // Nhận diện App theo Package hoặc Label
+          const pkg = (meta.packageName || "").toLowerCase();
+          const lbl = (meta.appLabel || "").toLowerCase();
+          if (pkg.includes("smartcall") || lbl.includes("smartcall")) {
+            appSelect.value = "vnsmartcall";
+          } else if (pkg.includes("mydts") || lbl.includes("mydts")) {
+            appSelect.value = "mydts";
+          } else if (pkg.includes("poscake") || lbl.includes("poscake")) {
+            appSelect.value = "poscake";
+          }
+        } else {
+          metaStatus.textContent = "⚠️ Không đọc được manifest nhị phân, dùng tên file làm fallback.";
+          const fLower = file.name.toLowerCase();
+          if (fLower.includes("smartcall")) appSelect.value = "vnsmartcall";
+          else if (fLower.includes("mydts") || fLower.includes("dts")) appSelect.value = "mydts";
+          else if (fLower.includes("poscake")) appSelect.value = "poscake";
+
+          const matchVer = file.name.match(/\d+\.\d+(\.\d+)?/);
+          if (matchVer && !versionInput.value) {
+            versionInput.value = matchVer[0];
+          }
         }
 
-        // Tự tìm số version trong tên file nếu có (vd: v1.0 hoặc 1.0)
-        const matchVer = file.name.match(/\d+\.\d+(\.\d+)?/);
-        if (matchVer && !versionInput.value) {
-          versionInput.value = matchVer[0];
-        }
         updateTag();
       }
 
