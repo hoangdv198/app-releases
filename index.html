@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Tải Ứng Dụng myDTS (Android APK)</title>
-  <meta name="description" content="Tải ứng dụng myDTS phiên bản mới nhất cho điện thoại Android. Cài đặt trực tiếp qua file APK an toàn, nhanh chóng.">
+  <title id="pageTitle">Tải Ứng Dụng (Android APK)</title>
+  <meta name="description" content="Tải ứng dụng Android APK phiên bản mới nhất, an toàn và nhanh chóng.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📱</text></svg>">
   <style>
     :root {
@@ -15,7 +15,7 @@
       --text-main: #0f172a;
       --text-sub: #64748b;
       --border: #e2e8f0;
-      --success: #10b981;
+      --gradient: linear-gradient(135deg, #1e40af, #3b82f6);
     }
 
     * {
@@ -60,7 +60,7 @@
       left: 0;
       right: 0;
       height: 6px;
-      background: linear-gradient(90deg, #3b82f6, #6366f1, #8b5cf6);
+      background: var(--gradient);
     }
 
     .app-icon {
@@ -68,13 +68,13 @@
       height: 88px;
       border-radius: 20px;
       margin: 0 auto 16px;
-      background: linear-gradient(135deg, #1e40af, #3b82f6);
+      background: var(--gradient);
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 8px 16px rgba(37, 99, 235, 0.25);
+      box-shadow: 0 8px 16px rgba(37, 99, 235, 0.2);
       color: white;
-      font-size: 38px;
+      font-size: 34px;
       font-weight: 800;
       letter-spacing: -1px;
     }
@@ -235,16 +235,22 @@
       margin-top: 4px;
     }
 
+    /* Giao diện bảo mật 404 khi truy cập sai đường dẫn */
+    .not-found-view {
+      display: none;
+      padding: 40px 10px;
+    }
+
+    .not-found-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
     footer {
       margin-top: 20px;
       font-size: 12px;
       color: #94a3b8;
       text-align: center;
-    }
-
-    footer a {
-      color: #64748b;
-      text-decoration: none;
     }
 
     .loading-pulse {
@@ -260,66 +266,144 @@
 <body>
 
   <div class="container">
-    <div class="card">
-      <div class="app-icon">DTS</div>
-      <h1 class="app-title">myDTS</h1>
-      <p class="app-subtitle">Ứng dụng quản lý & làm việc nội bộ</p>
+    <div class="card" id="mainCard">
+      
+      <!-- Khung hiển thị App Download -->
+      <div id="appView">
+        <div class="app-icon" id="appIcon">DTS</div>
+        <h1 class="app-title" id="appTitle">myDTS</h1>
+        <p class="app-subtitle" id="appSubtitle">Ứng dụng quản lý & làm việc nội bộ</p>
 
-      <div class="meta-badges">
-        <span class="badge version" id="versionBadge">
-          <span class="loading-pulse">Đang tải...</span>
-        </span>
-        <span class="badge size" id="sizeBadge" style="display: none;">34.0 MB</span>
-        <span class="badge" id="dateBadge" style="display: none;">Cập nhật mới</span>
-      </div>
-
-      <a id="downloadBtn" href="https://github.com/hoangdv198/app-releases/releases/latest/download/app-release.apk" class="btn-download" download>
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-        </svg>
-        <span>Tải về file APK</span>
-      </a>
-
-      <div class="changelog-box" id="changelogBox" style="display: none;">
-        <div class="changelog-title">
-          <span>✨</span> Có gì mới trong bản này:
+        <div class="meta-badges">
+          <span class="badge version" id="versionBadge">
+            <span class="loading-pulse">Đang tải...</span>
+          </span>
+          <span class="badge size" id="sizeBadge" style="display: none;">34.4 MB</span>
+          <span class="badge" id="dateBadge" style="display: none;">Cập nhật mới</span>
         </div>
-        <div class="changelog-content" id="changelogContent"></div>
+
+        <a id="downloadBtn" href="#" class="btn-download" download>
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+          </svg>
+          <span>Tải về file APK</span>
+        </a>
+
+        <div class="changelog-box" id="changelogBox" style="display: none;">
+          <div class="changelog-title">
+            <span>✨</span> Có gì mới trong bản này:
+          </div>
+          <div class="changelog-content" id="changelogContent"></div>
+        </div>
+
+        <div class="instructions">
+          <strong>💡 Hướng dẫn cài đặt file APK trên Android:</strong>
+          <ol>
+            <li>Bấm <strong>"Tải về file APK"</strong> phía trên.</li>
+            <li>Khi trình duyệt hỏi <em>"Tệp này có thể gây hại..."</em>, chọn <strong>Vẫn tải xuống</strong>.</li>
+            <li>Mở file vừa tải về và chọn <strong>Cài đặt</strong> (bật <em>"Cho phép từ nguồn này"</em> nếu được yêu cầu).</li>
+          </ol>
+        </div>
+
+        <div class="qr-section">
+          <div class="qr-title">Quét mã QR bằng điện thoại để tải nhanh:</div>
+          <img id="qrCode" class="qr-image" src="" alt="QR Code Tải App">
+        </div>
       </div>
 
-      <div class="instructions">
-        <strong>💡 Hướng dẫn cài đặt file APK trên Android:</strong>
-        <ol>
-          <li>Bấm <strong>"Tải về file APK"</strong> phía trên.</li>
-          <li>Khi trình duyệt hỏi <em>"Tệp này có thể gây hại..."</em>, chọn <strong>Vẫn tải xuống</strong>.</li>
-          <li>Mở file vừa tải về và chọn <strong>Cài đặt</strong> (bật <em>"Cho phép từ nguồn này"</em> nếu được yêu cầu).</li>
-        </ol>
+      <!-- Khung hiển thị khi vào sai đường dẫn hoặc trang chủ không có quyền -->
+      <div id="notFoundView" class="not-found-view">
+        <div class="not-found-icon">🔒</div>
+        <h2 style="font-size: 20px; margin-bottom: 8px;">Đường Dẫn Không Hợp Lệ</h2>
+        <p style="color: var(--text-sub); font-size: 14px; line-height: 1.5;">
+          Bạn cần đường dẫn chính xác của ứng dụng để tải về. Vui lòng liên hệ quản trị viên để nhận liên kết hợp lệ.
+        </p>
       </div>
 
-      <div class="qr-section">
-        <div class="qr-title">Quét mã QR bằng điện thoại để tải nhanh:</div>
-        <img id="qrCode" class="qr-image" src="" alt="QR Code Tải App">
-      </div>
     </div>
 
     <footer>
-      &copy; 2026 myDTS &bull; Cung cấp bởi <a href="https://github.com/hoangdv198/app-releases" target="_blank">hoangdv198/app-releases</a>
+      &copy; 2026 App Distribution Hub
     </footer>
   </div>
 
   <script>
     const GITHUB_REPO = "hoangdv198/app-releases";
-    const TARGET_APK_NAME = "mydts.apk";
 
-    // Khởi tạo mã QR theo chính URL hiện tại
-    const currentUrl = window.location.href;
-    const qrImg = document.getElementById("qrCode");
-    if (qrImg) {
-      qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(currentUrl)}`;
+    // CẤU HÌNH DANH SÁCH ỨNG DỤNG BẢO MẬT THEO ROUTE
+    // Chỉ những ai có đúng link (ví dụ: /mydts) mới thấy app đó!
+    const APPS_CONFIG = {
+      "mydts": {
+        name: "myDTS",
+        subtitle: "Ứng dụng quản lý & làm việc nội bộ",
+        iconText: "DTS",
+        apkPattern: ["mydts", "app-release"], // Khớp tên file trong GitHub Release
+        themeColor: "#2563eb",
+        gradient: "linear-gradient(135deg, #1e40af, #3b82f6)"
+      },
+      "poscake": {
+        name: "Poscake Tools",
+        subtitle: "Hệ thống hỗ trợ bán hàng & đối soát đơn",
+        iconText: "POS",
+        apkPattern: ["poscake"],
+        themeColor: "#059669",
+        gradient: "linear-gradient(135deg, #047857, #10b981)"
+      },
+      "shift": {
+        name: "Shift Manager",
+        subtitle: "Ứng dụng chấm công & quản lý ca làm",
+        iconText: "SM",
+        apkPattern: ["shift"],
+        themeColor: "#7c3aed",
+        gradient: "linear-gradient(135deg, #6d28d9, #8b5cf6)"
+      }
+    };
+
+    function getAppSlugFromUrl() {
+      const path = window.location.pathname.replace(/^\/+|\/+$/g, "").toLowerCase();
+      // Nếu vào root (/) hoặc /index.html thì mặc định mở mydts hoặc ẩn tùy cấu hình
+      if (!path || path === "index.html") {
+        return "mydts"; 
+      }
+      return path;
     }
 
-    // Tự động fetch thông tin phiên bản mới nhất từ GitHub Releases API
-    async function loadLatestRelease() {
+    async function initPage() {
+      const slug = getAppSlugFromUrl();
+      const appConf = APPS_CONFIG[slug];
+
+      const appView = document.getElementById("appView");
+      const notFoundView = document.getElementById("notFoundView");
+
+      // Nếu truy cập route không tồn tại trong danh sách bảo mật
+      if (!appConf) {
+        appView.style.display = "none";
+        notFoundView.style.display = "block";
+        document.getElementById("pageTitle").textContent = "Không tìm thấy ứng dụng";
+        return;
+      }
+
+      // Cập nhật giao diện theo App tương ứng
+      document.getElementById("pageTitle").textContent = `Tải Ứng Dụng ${appConf.name} (Android APK)`;
+      document.getElementById("appTitle").textContent = appConf.name;
+      document.getElementById("appSubtitle").textContent = appConf.subtitle;
+      document.getElementById("appIcon").textContent = appConf.iconText;
+
+      // Áp dụng màu sắc thương hiệu của App
+      document.documentElement.style.setProperty("--primary", appConf.themeColor);
+      document.documentElement.style.setProperty("--gradient", appConf.gradient);
+
+      // Tạo mã QR theo đúng link hiện tại
+      const qrImg = document.getElementById("qrCode");
+      if (qrImg) {
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(window.location.href)}`;
+      }
+
+      // Fetch GitHub Release để lấy bản mới nhất của App này
+      await fetchReleaseData(appConf);
+    }
+
+    async function fetchReleaseData(appConf) {
       const versionEl = document.getElementById("versionBadge");
       const sizeEl = document.getElementById("sizeBadge");
       const dateEl = document.getElementById("dateBadge");
@@ -336,12 +420,10 @@
 
         const data = await resp.json();
 
-        // 1. Cập nhật Version Tag
         if (data.tag_name) {
           versionEl.textContent = `Phiên bản: ${data.tag_name}`;
         }
 
-        // 2. Cập nhật Ngày phát hành
         if (data.published_at) {
           const date = new Date(data.published_at);
           const formatted = date.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
@@ -349,10 +431,15 @@
           dateEl.style.display = "inline-flex";
         }
 
-        // 3. Tìm file APK trong danh sách Assets
+        // Tìm file APK khớp với ứng dụng này
         let matchedApk = null;
         if (Array.isArray(data.assets)) {
-          matchedApk = data.assets.find(a => a.name.toLowerCase().endsWith(".apk") && (a.name.toLowerCase().includes("mydts") || a.name.toLowerCase().includes("app")));
+          matchedApk = data.assets.find(a => {
+            const fileName = a.name.toLowerCase();
+            return fileName.endsWith(".apk") && appConf.apkPattern.some(pattern => fileName.includes(pattern));
+          });
+
+          // Nếu chưa tìm thấy thì fallback lấy file apk đầu tiên
           if (!matchedApk && data.assets.length > 0) {
             matchedApk = data.assets.find(a => a.name.toLowerCase().endsWith(".apk"));
           }
@@ -367,7 +454,6 @@
           }
         }
 
-        // 4. Cập nhật Release Notes nếu có
         if (data.body && data.body.trim()) {
           changelogContent.textContent = data.body.trim();
           changelogBox.style.display = "block";
@@ -379,7 +465,7 @@
       }
     }
 
-    document.addEventListener("DOMContentLoaded", loadLatestRelease);
+    document.addEventListener("DOMContentLoaded", initPage);
   </script>
 </body>
 </html>
