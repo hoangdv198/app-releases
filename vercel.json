@@ -1,6 +1,12 @@
 {
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/index.html" }
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/admin", "destination": "/admin/index.html" },
+    { "source": "/admin/(.*)", "destination": "/admin/index.html" },
+    { "source": "/mydts", "destination": "/mydts/index.html" },
+    { "source": "/mydts/(.*)", "destination": "/mydts/index.html" },
+    { "source": "/vnsmartcall", "destination": "/vnsmartcall/index.html" },
+    { "source": "/vnsmartcall/(.*)", "destination": "/vnsmartcall/index.html" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
