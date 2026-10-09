@@ -49,6 +49,21 @@
 
     .token-section { background: #f1f5f9; border-radius: 12px; padding: 12px 14px; margin-bottom: 20px; font-size: 12px; color: #475569; }
     .token-section a { color: var(--primary); text-decoration: none; }
+    
+    /* RELEASE LIST STYLES */
+    .release-manager { margin-top: 28px; border-top: 1px dashed var(--border); padding-top: 20px; text-align: left; }
+    .release-manager-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .release-manager-header h2 { font-size: 16px; font-weight: 700; color: var(--text-main); margin: 0; }
+    .refresh-btn { background: none; border: 1px solid var(--border); border-radius: 8px; padding: 4px 10px; font-size: 12px; color: var(--text-sub); cursor: pointer; }
+    .refresh-btn:hover { background: #f1f5f9; color: var(--text-main); }
+    .release-item { background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .release-item-info { flex: 1; min-width: 0; }
+    .release-item-title { font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+    .release-item-meta { font-size: 12px; color: var(--text-sub); display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-delete-rel { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
+    .btn-delete-rel:hover { background: #fca5a5; color: #991b1b; }
+    .btn-delete-rel:disabled { opacity: 0.5; cursor: not-allowed; }
+
     footer { margin-top: 24px; font-size: 12px; color: #94a3b8; text-align: center; }
   </style>
 </head>
@@ -123,6 +138,19 @@
           <input type="text" id="customSlug" placeholder="vd: khohang, shiftmanager">
         </div>
 
+        <div id="currentVersionHint" style="background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              📌 <strong>Bản mới nhất hiện có:</strong> <span id="latestVerText" style="color: var(--primary); font-weight: 700;">-</span>
+            </div>
+            <button type="button" id="autoSuggestVerBtn" style="background: #eff6ff; border: 1px solid #bfdbfe; color: var(--primary); border-radius: 6px; padding: 3px 8px; font-size: 11px; cursor: pointer; font-weight: 600;">
+              💡 Tăng bản tiếp theo
+            </button>
+          </div>
+          <div id="verListHistory" style="margin-top: 6px; font-size: 11px; color: var(--text-sub);"></div>
+        </div>
+
+
         <div style="display: flex; gap: 12px;">
           <div class="form-group" style="flex: 1;">
             <label>Phiên Bản (Version):</label>
@@ -148,6 +176,18 @@
         </div>
 
         <div class="status-msg" id="statusMsg"></div>
+
+        <!-- DANH SÁCH BẢN PHÁT HÀNH HIỆN CÓ (QUẢN LÝ & XÓA THỦ CÔNG) -->
+        <div class="release-manager" id="releaseManager">
+          <div class="release-manager-header">
+            <h2>📋 Bản Đã Phát Hành (GitHub)</h2>
+            <button class="refresh-btn" id="refreshReleasesBtn" type="button">🔄 Làm mới</button>
+          </div>
+          <div id="releaseListContainer" style="font-size: 13px; color: var(--text-sub);">
+            ⏳ Đang tải danh sách bản phát hành...
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -199,6 +239,7 @@
       document.getElementById("pinView").style.display = "none";
       document.getElementById("adminView").style.display = "block";
       initAdminForm();
+      loadReleasesList();
     }
 
     document.getElementById("logoutBtn").addEventListener("click", () => {
@@ -353,7 +394,9 @@
         const isCustom = appSelect.value === "custom";
         document.getElementById("customAppGroup").style.display = isCustom ? "block" : "none";
         updateTag();
+        updateAppVersionHint();
       });
+      document.getElementById("customSlug").addEventListener("input", updateAppVersionHint);
 
       versionInput.addEventListener("input", updateTag);
       document.getElementById("customSlug").addEventListener("input", updateTag);
@@ -417,6 +460,179 @@
       }
 
       document.getElementById("uploadBtn").addEventListener("click", uploadRelease);
+      document.getElementById("refreshReleasesBtn").addEventListener("click", loadReleasesList);
+    }
+
+    
+    
+    let cachedReleases = [];
+
+    async function updateAppVersionHint() {
+      const hintBox = document.getElementById("currentVersionHint");
+      const latestVerText = document.getElementById("latestVerText");
+      const historyEl = document.getElementById("verListHistory");
+      const versionInput = document.getElementById("versionInput");
+      const appSelect = document.getElementById("appSelect");
+
+      if (!hintBox) return;
+
+      const selectedApp = appSelect.value === "custom" ? (document.getElementById("customSlug").value.trim().toLowerCase()) : appSelect.value;
+      if (!selectedApp) {
+        hintBox.style.display = "none";
+        return;
+      }
+
+      // Lọc danh sách release của app này
+      const appReleases = cachedReleases.filter(r => {
+        const tag = (r.tag_name || "").toLowerCase();
+        return tag.startsWith(selectedApp + "-");
+      });
+
+      hintBox.style.display = "block";
+
+      if (appReleases.length === 0) {
+        latestVerText.textContent = "Chưa có bản nào";
+        latestVerText.style.color = "#64748b";
+        historyEl.innerHTML = "💡 Gợi ý phiên bản đầu tiên: <strong>1.0.0</strong>";
+        document.getElementById("autoSuggestVerBtn").onclick = () => {
+          versionInput.value = "1.0.0";
+          versionInput.dispatchEvent(new Event("input"));
+        };
+        return;
+      }
+
+      const latest = appReleases[0];
+      const match = (latest.tag_name || "").match(/\d+(\.\d+)+/);
+      const latestVer = match ? match[0] : (latest.name || "1.0.0");
+      latestVerText.textContent = "v" + latestVer;
+      latestVerText.style.color = "#2563eb";
+
+      // Tính số version tiếp theo
+      const parts = latestVer.split(".").map(n => parseInt(n, 10) || 0);
+      if (parts.length > 0) parts[parts.length - 1] += 1;
+      const nextVer = parts.join(".");
+
+      const historyTags = appReleases.slice(0, 4).map(r => r.tag_name).join(", ");
+      historyEl.innerHTML = `Lịch sử gần đây: ${historyTags} &bull; Gợi ý bản tới: <strong>${nextVer}</strong>`;
+
+      document.getElementById("autoSuggestVerBtn").onclick = () => {
+        versionInput.value = nextVer;
+        versionInput.dispatchEvent(new Event("input"));
+      };
+    }
+
+    // QUẢN LÝ & XÓA RELEASE THỦ CÔNG
+    async function loadReleasesList() {
+      const container = document.getElementById("releaseListContainer");
+      if (!container) return;
+
+      container.innerHTML = '⏳ Đang tải danh sách bản phát hành...';
+      try {
+        const resp = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases?per_page=20`);
+        if (!resp.ok) throw new Error("Không thể tải danh sách");
+        const releases = await resp.json();
+        cachedReleases = releases;
+        updateAppVersionHint();
+
+        if (!Array.isArray(releases) || releases.length === 0) {
+          container.innerHTML = '<div style="text-align: center; padding: 12px; color: #94a3b8;">Chưa có bản phát hành nào trên GitHub.</div>';
+          return;
+        }
+
+        let htmlStr = "";
+        releases.forEach(rel => {
+          const apkAsset = (rel.assets || []).find(a => (a.name || "").toLowerCase().endsWith(".apk"));
+          const sizeMb = apkAsset ? (apkAsset.size / (1024 * 1024)).toFixed(1) + " MB" : "Chưa có file";
+          const dateStr = rel.published_at ? new Date(rel.published_at).toLocaleDateString("vi-VN") : "Mới";
+
+          htmlStr += `
+            <div class="release-item" id="rel-item-${rel.id}">
+              <div class="release-item-info">
+                <div class="release-item-title">
+                  <span>📱 ${rel.name || rel.tag_name}</span>
+                  <span style="font-size: 11px; background: #e2e8f0; color: #334155; padding: 2px 6px; border-radius: 6px; font-weight: normal;">${rel.tag_name}</span>
+                </div>
+                <div class="release-item-meta">
+                  <span>⚖️ ${sizeMb}</span>
+                  <span>📅 ${dateStr}</span>
+                </div>
+              </div>
+              <button class="btn-delete-rel" onclick="confirmDeleteRelease(${rel.id}, '${rel.tag_name}', '${encodeURIComponent(rel.name || rel.tag_name)}')">
+                🗑️ Xóa bản này
+              </button>
+            </div>
+          `;
+        });
+
+        container.innerHTML = htmlStr;
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = '<div style="color: #dc2626; padding: 8px;">❌ Không tải được danh sách releases từ GitHub.</div>';
+      }
+    }
+
+    async function confirmDeleteRelease(releaseId, tagName, encodedName) {
+      const name = decodeURIComponent(encodedName);
+      const token = localStorage.getItem("gh_pat_token");
+      if (!token) {
+        alert("Vui lòng lưu GitHub Token ở phía trên trước khi thực hiện xóa!");
+        return;
+      }
+
+      const ok = confirm(`⚠️ XÁC NHẬN XÓA BẢN NÀY?\n\n- Bản: ${name} (${tagName})\n- Thao tác này sẽ xóa vĩnh viễn Release và file APK khỏi GitHub để giải phóng dung lượng.\n\nBạn có chắc chắn muốn xóa không?`);
+      if (!ok) return;
+
+      const itemEl = document.getElementById(`rel-item-${releaseId}`);
+      if (itemEl) {
+        itemEl.style.opacity = "0.5";
+        const delBtn = itemEl.querySelector(".btn-delete-rel");
+        if (delBtn) {
+          delBtn.disabled = true;
+          delBtn.textContent = "⏳ Đang xóa...";
+        }
+      }
+
+      try {
+        // 1. Xóa Release (giải phóng file APK asset)
+        const delRelResp = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/${releaseId}`, {
+          method: "DELETE",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Accept": "application/vnd.github+json"
+          }
+        });
+
+        if (!delRelResp.ok && delRelResp.status !== 404) {
+          const errData = await delRelResp.json().catch(() => ({}));
+          throw new Error(errData.message || "Lỗi khi xóa Release");
+        }
+
+        // 2. Xóa Tag tương ứng trên Git để sạch repo
+        if (tagName) {
+          await fetch(`https://api.github.com/repos/${GITHUB_REPO}/git/refs/tags/${encodeURIComponent(tagName)}`, {
+            method: "DELETE",
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Accept": "application/vnd.github+json"
+            }
+          }).catch(e => console.warn("Lỗi xóa tag:", e));
+        }
+
+        alert(`✅ Đã xóa thành công bản ${name} và file APK khỏi GitHub!`);
+        loadReleasesList();
+
+      } catch (err) {
+        console.error("Lỗi xóa release:", err);
+        alert("❌ Xóa thất bại: " + err.message);
+        if (itemEl) {
+          itemEl.style.opacity = "1";
+          const delBtn = itemEl.querySelector(".btn-delete-rel");
+          if (delBtn) {
+            delBtn.disabled = false;
+            delBtn.textContent = "🗑️ Xóa bản này";
+          }
+        }
+      }
     }
 
     async function uploadRelease() {
@@ -495,6 +711,7 @@
         statusMsg.className = "status-msg success";
         statusMsg.innerHTML = `🎉 <strong>Thành công!</strong> Đã phát hành bản ${tagName}.<br>Khách hàng có thể tải ngay trên trang chủ!`;
         uploadBtn.disabled = false;
+        loadReleasesList();
 
       } catch (err) {
         console.error(err);

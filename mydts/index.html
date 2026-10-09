@@ -785,7 +785,9 @@
         }
         if (targetRelease.published_at) {
           const date = new Date(targetRelease.published_at);
-          dateEl.textContent = `Ngày: ${date.toLocaleDateString("vi-VN")}`;
+          const dateStr = date.toLocaleDateString("vi-VN");
+          const timeStr = date.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+          dateEl.textContent = `Cập nhật: ${timeStr} ${dateStr}`;
           dateEl.style.display = "inline-flex";
         }
 
