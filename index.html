@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Tải Ứng Dụng myDTS (Android APK)</title>
+  <meta name="description" content="Tải ứng dụng myDTS phiên bản mới nhất cho điện thoại Android. Cài đặt trực tiếp qua file APK an toàn, nhanh chóng.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📱</text></svg>">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-sub: #64748b;
+      --border: #e2e8f0;
+      --success: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 440px;
+      margin: auto 0;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+      padding: 32px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #3b82f6, #6366f1, #8b5cf6);
+    }
+
+    .app-icon {
+      width: 88px;
+      height: 88px;
+      border-radius: 20px;
+      margin: 0 auto 16px;
+      background: linear-gradient(135deg, #1e40af, #3b82f6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 16px rgba(37, 99, 235, 0.25);
+      color: white;
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .app-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .app-subtitle {
+      font-size: 14px;
+      color: var(--text-sub);
+      margin-bottom: 20px;
+    }
+
+    .meta-badges {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .badge {
+      background: #f1f5f9;
+      color: #334155;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .badge.version {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+    }
+
+    .badge.size {
+      background: #f0fdf4;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+    }
+
+    .btn-download {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 600;
+      padding: 15px 20px;
+      border-radius: 14px;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-download:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.4);
+    }
+
+    .btn-download:active {
+      transform: translateY(1px);
+    }
+
+    .btn-download svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .changelog-box {
+      margin-top: 24px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    .changelog-title {
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .changelog-content {
+      color: var(--text-sub);
+      line-height: 1.5;
+      white-space: pre-line;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+
+    .qr-section {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px dashed var(--border);
+      display: none;
+    }
+
+    @media (min-width: 640px) {
+      .qr-section {
+        display: block;
+      }
+    }
+
+    .qr-title {
+      font-size: 13px;
+      color: var(--text-sub);
+      margin-bottom: 12px;
+    }
+
+    .qr-image {
+      width: 140px;
+      height: 140px;
+      margin: 0 auto;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 6px;
+      background: white;
+    }
+
+    .instructions {
+      margin-top: 24px;
+      text-align: left;
+      background: #fffbeb;
+      border: 1px solid #fef3c7;
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 12px;
+      color: #92400e;
+      line-height: 1.6;
+    }
+
+    .instructions strong {
+      color: #78350f;
+    }
+
+    .instructions ol {
+      margin-left: 18px;
+      margin-top: 4px;
+    }
+
+    footer {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #94a3b8;
+      text-align: center;
+    }
+
+    footer a {
+      color: #64748b;
+      text-decoration: none;
+    }
+
+    .loading-pulse {
+      animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .4; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="card">
+      <div class="app-icon">DTS</div>
+      <h1 class="app-title">myDTS</h1>
+      <p class="app-subtitle">Ứng dụng quản lý & làm việc nội bộ</p>
+
+      <div class="meta-badges">
+        <span class="badge version" id="versionBadge">
+          <span class="loading-pulse">Đang tải...</span>
+        </span>
+        <span class="badge size" id="sizeBadge" style="display: none;">34.0 MB</span>
+        <span class="badge" id="dateBadge" style="display: none;">Cập nhật mới</span>
+      </div>
+
+      <a id="downloadBtn" href="https://github.com/hoangdv198/app-releases/releases/latest/download/mydts.apk" class="btn-download" download>
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+        </svg>
+        <span>Tải về file APK</span>
+      </a>
+
+      <div class="changelog-box" id="changelogBox" style="display: none;">
+        <div class="changelog-title">
+          <span>✨</span> Có gì mới trong bản này:
+        </div>
+        <div class="changelog-content" id="changelogContent"></div>
+      </div>
+
+      <div class="instructions">
+        <strong>💡 Hướng dẫn cài đặt file APK trên Android:</strong>
+        <ol>
+          <li>Bấm <strong>"Tải về file APK"</strong> phía trên.</li>
+          <li>Khi trình duyệt hỏi <em>"Tệp này có thể gây hại..."</em>, chọn <strong>Vẫn tải xuống</strong>.</li>
+          <li>Mở file vừa tải về và chọn <strong>Cài đặt</strong> (bật <em>"Cho phép từ nguồn này"</em> nếu được yêu cầu).</li>
+        </ol>
+      </div>
+
+      <div class="qr-section">
+        <div class="qr-title">Quét mã QR bằng điện thoại để tải nhanh:</div>
+        <img id="qrCode" class="qr-image" src="" alt="QR Code Tải App">
+      </div>
+    </div>
+
+    <footer>
+      &copy; 2026 myDTS &bull; Cung cấp bởi <a href="https://github.com/hoangdv198/app-releases" target="_blank">hoangdv198/app-releases</a>
+    </footer>
+  </div>
+
+  <script>
+    const GITHUB_REPO = "hoangdv198/app-releases";
+    const TARGET_APK_NAME = "mydts.apk";
+
+    // Khởi tạo mã QR theo chính URL hiện tại
+    const currentUrl = window.location.href;
+    const qrImg = document.getElementById("qrCode");
+    if (qrImg) {
+      qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(currentUrl)}`;
+    }
+
+    // Tự động fetch thông tin phiên bản mới nhất từ GitHub Releases API
+    async function loadLatestRelease() {
+      const versionEl = document.getElementById("versionBadge");
+      const sizeEl = document.getElementById("sizeBadge");
+      const dateEl = document.getElementById("dateBadge");
+      const btnEl = document.getElementById("downloadBtn");
+      const changelogBox = document.getElementById("changelogBox");
+      const changelogContent = document.getElementById("changelogContent");
+
+      try {
+        const resp = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`);
+        if (!resp.ok) {
+          versionEl.textContent = "Bản mới nhất";
+          return;
+        }
+
+        const data = await resp.json();
+
+        // 1. Cập nhật Version Tag
+        if (data.tag_name) {
+          versionEl.textContent = `Phiên bản: ${data.tag_name}`;
+        }
+
+        // 2. Cập nhật Ngày phát hành
+        if (data.published_at) {
+          const date = new Date(data.published_at);
+          const formatted = date.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
+          dateEl.textContent = `Ngày: ${formatted}`;
+          dateEl.style.display = "inline-flex";
+        }
+
+        // 3. Tìm file APK trong danh sách Assets
+        let matchedApk = null;
+        if (Array.isArray(data.assets)) {
+          matchedApk = data.assets.find(a => a.name.toLowerCase().endsWith(".apk") && (a.name.toLowerCase().includes("mydts") || a.name.toLowerCase().includes("app")));
+          if (!matchedApk && data.assets.length > 0) {
+            matchedApk = data.assets.find(a => a.name.toLowerCase().endsWith(".apk"));
+          }
+        }
+
+        if (matchedApk) {
+          btnEl.href = matchedApk.browser_download_url;
+          if (matchedApk.size) {
+            const sizeMB = (matchedApk.size / (1024 * 1024)).toFixed(1);
+            sizeEl.textContent = `${sizeMB} MB`;
+            sizeEl.style.display = "inline-flex";
+          }
+        }
+
+        // 4. Cập nhật Release Notes nếu có
+        if (data.body && data.body.trim()) {
+          changelogContent.textContent = data.body.trim();
+          changelogBox.style.display = "block";
+        }
+
+      } catch (e) {
+        console.warn("Không thể fetch GitHub release API:", e);
+        versionEl.textContent = "Bản mới nhất";
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", loadLatestRelease);
+  </script>
+</body>
+</html>
