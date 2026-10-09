@@ -332,30 +332,33 @@
 
     // CẤU HÌNH DANH SÁCH ỨNG DỤNG BẢO MẬT THEO ROUTE
     // Chỉ những ai có đúng link (ví dụ: /mydts) mới thấy app đó!
-    const APPS_CONFIG = {
+        const APPS_CONFIG = {
       "mydts": {
         name: "myDTS",
         subtitle: "Ứng dụng quản lý & làm việc nội bộ",
         iconText: "DTS",
-        apkPattern: ["mydts", "app-release"], // Khớp tên file trong GitHub Release
+        tagPrefix: "mydts",
+        apkPattern: ["mydts", "app-release"],
         themeColor: "#2563eb",
         gradient: "linear-gradient(135deg, #1e40af, #3b82f6)"
+      },
+      "vnsmartcall": {
+        name: "VNSmartCall",
+        subtitle: "Ứng dụng tổng đài & gọi điện thông minh",
+        iconText: "VNS",
+        tagPrefix: "vnsmartcall",
+        apkPattern: ["vnsmartcall", "smartcall"],
+        themeColor: "#0284c7",
+        gradient: "linear-gradient(135deg, #0369a1, #38bdf8)"
       },
       "poscake": {
         name: "Poscake Tools",
         subtitle: "Hệ thống hỗ trợ bán hàng & đối soát đơn",
         iconText: "POS",
+        tagPrefix: "poscake",
         apkPattern: ["poscake"],
         themeColor: "#059669",
         gradient: "linear-gradient(135deg, #047857, #10b981)"
-      },
-      "shift": {
-        name: "Shift Manager",
-        subtitle: "Ứng dụng chấm công & quản lý ca làm",
-        iconText: "SM",
-        apkPattern: ["shift"],
-        themeColor: "#7c3aed",
-        gradient: "linear-gradient(135deg, #6d28d9, #8b5cf6)"
       }
     };
 
@@ -412,36 +415,62 @@
       const changelogContent = document.getElementById("changelogContent");
 
       try {
-        const resp = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`);
+        // Lấy toàn bộ danh sách releases để tìm bản mới nhất thuộc về app này
+        const resp = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases`);
         if (!resp.ok) {
           versionEl.textContent = "Bản mới nhất";
           return;
         }
 
-        const data = await resp.json();
-
-        if (data.tag_name) {
-          versionEl.textContent = `Phiên bản: ${data.tag_name}`;
+        const releases = await resp.json();
+        if (!Array.isArray(releases) || releases.length === 0) {
+          versionEl.textContent = "Bản mới nhất";
+          return;
         }
 
-        if (data.published_at) {
-          const date = new Date(data.published_at);
+        // 1. Tìm release phù hợp nhất cho app này:
+        // Tiêu chí 1: Tag chứa tagPrefix (vd vnsmartcall-v1.0.0 hoặc vnsmartcall-...)
+        // Tiêu chí 2: Trong assets có file apk chứa tên app (vd vnsmartcall.apk)
+        let targetRelease = releases.find(r => {
+          const tag = (r.tag_name || "").toLowerCase();
+          const title = (r.name || "").toLowerCase();
+          if (tag.includes(appConf.tagPrefix) || title.includes(appConf.tagPrefix)) return true;
+          return (r.assets || []).some(a => {
+            const fName = (a.name || "").toLowerCase();
+            return fName.endsWith(".apk") && appConf.apkPattern.some(p => fName.includes(p));
+          });
+        });
+
+        // Nếu không khớp riêng, fallback về release mới nhất
+        if (!targetRelease) {
+          targetRelease = releases[0];
+        }
+
+        // Cập nhật thông tin version
+        if (targetRelease.tag_name) {
+          // Rút gọn tag nếu có prefix: ví dụ 'vnsmartcall-v1.0.0' -> 'v1.0.0'
+          let displayVer = targetRelease.tag_name;
+          displayVer = displayVer.replace(new RegExp(`^${appConf.tagPrefix}[-_]?`, "i"), "");
+          versionEl.textContent = `Phiên bản: ${displayVer}`;
+        }
+
+        if (targetRelease.published_at) {
+          const date = new Date(targetRelease.published_at);
           const formatted = date.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
           dateEl.textContent = `Ngày: ${formatted}`;
           dateEl.style.display = "inline-flex";
         }
 
-        // Tìm file APK khớp với ứng dụng này
+        // Tìm file APK của app
         let matchedApk = null;
-        if (Array.isArray(data.assets)) {
-          matchedApk = data.assets.find(a => {
-            const fileName = a.name.toLowerCase();
+        if (Array.isArray(targetRelease.assets)) {
+          matchedApk = targetRelease.assets.find(a => {
+            const fileName = (a.name || "").toLowerCase();
             return fileName.endsWith(".apk") && appConf.apkPattern.some(pattern => fileName.includes(pattern));
           });
 
-          // Nếu chưa tìm thấy thì fallback lấy file apk đầu tiên
-          if (!matchedApk && data.assets.length > 0) {
-            matchedApk = data.assets.find(a => a.name.toLowerCase().endsWith(".apk"));
+          if (!matchedApk && targetRelease.assets.length > 0) {
+            matchedApk = targetRelease.assets.find(a => (a.name || "").toLowerCase().endsWith(".apk"));
           }
         }
 
@@ -454,8 +483,8 @@
           }
         }
 
-        if (data.body && data.body.trim()) {
-          changelogContent.textContent = data.body.trim();
+        if (targetRelease.body && targetRelease.body.trim()) {
+          changelogContent.textContent = targetRelease.body.trim();
           changelogBox.style.display = "block";
         }
 
