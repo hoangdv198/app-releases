@@ -397,7 +397,53 @@
       0%, 100% { opacity: 1; }
       50% { opacity: .4; }
     }
-  </style>
+  
+/* ADMIN STYLES */
+
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-sub: #64748b;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 24px 16px; }
+    .container { width: 100%; max-width: 500px; margin: auto 0; }
+    .card { background: var(--card-bg); border-radius: 24px; border: 1px solid var(--border); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); padding: 32px 24px; }
+    h1 { font-size: 22px; font-weight: 700; margin-bottom: 8px; text-align: center; }
+    p.sub { font-size: 14px; color: var(--text-sub); margin-bottom: 24px; text-align: center; }
+    
+    .pin-box { display: flex; justify-content: center; gap: 10px; margin: 20px 0; }
+    .pin-input { width: 44px; height: 52px; font-size: 24px; text-align: center; border-radius: 12px; border: 2px solid var(--border); outline: none; font-weight: 700; }
+    .pin-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+    
+    .form-group { margin-bottom: 16px; text-align: left; }
+    label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #334155; }
+    input[type="text"], textarea, select { width: 100%; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border); font-size: 14px; outline: none; }
+    input:focus, textarea:focus, select:focus { border-color: var(--primary); }
+    
+    .drop-zone { border: 2px dashed #cbd5e1; border-radius: 16px; padding: 28px 16px; text-align: center; background: #f8fafc; cursor: pointer; transition: all 0.2s; margin-bottom: 20px; }
+    .drop-zone.dragover { border-color: var(--primary); background: #eff6ff; }
+    .drop-zone-icon { font-size: 36px; margin-bottom: 8px; }
+    
+    .btn { width: 100%; background: var(--primary); color: white; padding: 14px; border-radius: 14px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn:hover { background: var(--primary-hover); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    
+    .progress-bar { width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top: 16px; display: none; }
+    .progress-fill { height: 100%; width: 0%; background: var(--primary); transition: width 0.2s; }
+    
+    .status-msg { margin-top: 14px; font-size: 13px; text-align: center; font-weight: 500; }
+    .status-msg.error { color: #dc2626; }
+    .status-msg.success { color: #16a34a; }
+
+    .token-section { background: #f1f5f9; border-radius: 12px; padding: 12px 14px; margin-bottom: 20px; font-size: 12px; color: #475569; }
+    .token-section a { color: var(--primary); text-decoration: none; }
+  
+</style>
 </head>
 <body>
 
@@ -463,6 +509,108 @@
           <div class="qr-title">Quét mã QR bằng điện thoại để tải nhanh:</div>
           <img id="qrCode" class="qr-image" src="" alt="QR Code Tải App">
         </div>
+      </div>
+    </div>
+
+    
+    <!-- MÀN HÌNH 3: TRANG QUẢN TRỊ ADMIN (/admin) -->
+    <div id="adminContainer" style="display: none;">
+      <div class="card">
+        
+      
+      <!-- STEP 1: NHẬP MÃ PIN 686868 -->
+      <div id="pinView">
+        <div style="font-size: 40px; text-align: center; margin-bottom: 8px;">🔐</div>
+        <h1>Xác Thực Quản Trị</h1>
+        <p class="sub">Nhập mã PIN để truy cập trang quản trị phát hành</p>
+        
+        <div class="pin-box">
+          <input type="password" maxlength="1" class="pin-input" autofocus>
+          <input type="password" maxlength="1" class="pin-input">
+          <input type="password" maxlength="1" class="pin-input">
+          <input type="password" maxlength="1" class="pin-input">
+          <input type="password" maxlength="1" class="pin-input">
+          <input type="password" maxlength="1" class="pin-input">
+        </div>
+        <div id="pinError" class="status-msg error" style="display: none;">Mã PIN không đúng, vui lòng thử lại!</div>
+      </div>
+
+      <!-- STEP 2: GIAO DIỆN UPLOAD APP -->
+      <div id="adminView" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h1 style="font-size: 20px; margin: 0;">⚡ Phát Hành Ứng Dụng</h1>
+          <button id="logoutBtn" style="background: none; border: none; color: #ef4444; font-size: 13px; cursor: pointer; font-weight: 600;">Đăng xuất</button>
+        </div>
+
+        <div class="token-section" id="tokenSection">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <strong>GitHub Token (Quyền Repo):</strong>
+            <span id="tokenStatus" style="color: #ea580c; font-weight: 600;">Chưa lưu</span>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <input type="password" id="ghTokenInput" placeholder="ghp_xxxx hoặc gho_xxxx" style="flex: 1; padding: 6px 10px; font-size: 12px;">
+            <button id="saveTokenBtn" style="padding: 6px 12px; background: #334155; color: white; border: none; border-radius: 8px; font-size: 12px; cursor: pointer;">Lưu</button>
+          </div>
+          <p style="margin-top: 6px; font-size: 11px; color: #64748b;">
+            Token được lưu riêng trong trình duyệt này. Chưa có? <a href="https://github.com/settings/tokens/new?scopes=repo&description=AppReleasesUpload" target="_blank">Tạo nhanh tại đây (Tick 'repo')</a>
+          </p>
+        </div>
+
+        <div class="drop-zone" id="dropZone">
+          <div class="drop-zone-icon">📦</div>
+          <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">Kéo thả file APK vào đây</div>
+          <div style="font-size: 12px; color: var(--text-sub);">hoặc click để chọn file từ máy tính</div>
+          <input type="file" id="fileInput" accept=".apk" style="display: none;">
+        </div>
+
+        <div id="fileInfoBox" style="display: none; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 12px; margin-bottom: 16px; font-size: 13px; text-align: left;">
+          <div>📄 <strong>Tên file:</strong> <span id="infoFileName"></span></div>
+          <div>⚖️ <strong>Dung lượng:</strong> <span id="infoFileSize"></span></div>
+        </div>
+
+        <div class="form-group">
+          <label>Chọn Ứng Dụng:</label>
+          <select id="appSelect">
+            <option value="vnsmartcall">VNSmartCall (Tổng đài thông minh)</option>
+            <option value="mydts">myDTS (Nội bộ DTS)</option>
+            <option value="poscake">Poscake Tools</option>
+            <option value="custom">+ Thêm App khác...</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="customAppGroup" style="display: none;">
+          <label>Mã định danh App mới (Slug):</label>
+          <input type="text" id="customSlug" placeholder="vd: khohang, shiftmanager">
+        </div>
+
+        <div style="display: flex; gap: 12px;">
+          <div class="form-group" style="flex: 1;">
+            <label>Phiên Bản (Version):</label>
+            <input type="text" id="versionInput" placeholder="vd: 1.0 hoặc 1.0.6">
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label>Tag Name:</label>
+            <input type="text" id="tagInput" placeholder="vd: vnsmartcall-v1.0" readonly style="background: #f1f5f9;">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Nội dung mới (Changelog):</label>
+          <textarea id="changelogInput" rows="2" placeholder="- Cải thiện hiệu năng và sửa lỗi..."></textarea>
+        </div>
+
+        <button class="btn" id="uploadBtn" disabled>
+          <span>🚀 Bắt Đầu Phát Hành (Upload Release)</span>
+        </button>
+
+        <div class="progress-bar" id="progressBar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="status-msg" id="statusMsg"></div>
+      </div>
+
+    
       </div>
     </div>
 
@@ -534,8 +682,11 @@
     async function initPage() {
       const path = window.location.pathname.replace(/^\/+|\/+$/g, "").toLowerCase();
 
-      // NẾU VÀO ROOT DOMAIN (/) HOẶC INDEX.HTML: HIỆN HUB TẤT CẢ APP
-      if (!path || path === "index.html") {
+      // NẾU VÀO TRANG ADMIN (/admin)
+      if (path === "admin") {
+        renderAdminView();
+      } else if (!path || path === "index.html") {
+        // NẾU VÀO ROOT DOMAIN (/) HOẶC INDEX.HTML: HIỆN HUB TẤT CẢ APP
         await renderHubView();
       } else if (APPS_CONFIG[path]) {
         // NẾU VÀO ĐÚNG ROUTE APP CỤ THỂ (ví dụ /mydts, /vnsmartcall)
@@ -659,7 +810,285 @@
       }
     }
 
+    
+    function renderAdminView() {
+      document.getElementById("hubView").style.display = "none";
+      document.getElementById("singleAppView").style.display = "none";
+      document.getElementById("adminContainer").style.display = "block";
+      document.getElementById("pageTitle").textContent = "Quản Trị Phát Hành Ứng Dụng";
+      initAdminLogic();
+    }
+
+    
+    const CORRECT_PIN = "686868";
+    const GITHUB_REPO = "hoangdv198/app-releases";
+    let selectedFile = null;
+
+    // PIN LOGIC
+    
+    function setupAdminHandlers() {
+      const pinInputs = document.querySelectorAll(".pin-input");
+    pinInputs.forEach((input, index) => {
+      input.addEventListener("input", (e) => {
+        if (e.target.value.length === 1 && index < pinInputs.length - 1) {
+          pinInputs[index + 1].focus();
+        }
+        checkPin();
+      });
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Backspace" && !e.target.value && index > 0) {
+          pinInputs[index - 1].focus();
+        }
+      });
+    });
+
+    
+    let adminInited = false;
+    function initAdminLogic() {
+      if (adminInited) return;
+      adminInited = true;
+      setupAdminHandlers();
+    }
+    function checkPin() {
+      const enteredPin = Array.from(pinInputs).map(i => i.value).join("");
+      if (enteredPin.length === 6) {
+        if (enteredPin === CORRECT_PIN) {
+          sessionStorage.setItem("admin_auth", "true");
+          showAdminView();
+        } else {
+          document.getElementById("pinError").style.display = "block";
+          pinInputs.forEach(i => i.value = "");
+          pinInputs[0].focus();
+        }
+      }
+    }
+
+    if (sessionStorage.getItem("admin_auth") === "true") {
+      showAdminView();
+    }
+
+    function showAdminView() {
+      document.getElementById("pinView").style.display = "none";
+      document.getElementById("adminView").style.display = "block";
+      initAdminForm();
+    }
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      sessionStorage.removeItem("admin_auth");
+      window.location.reload();
+    });
+
+    // ADMIN FORM & TOKEN MANAGEMENT
+    function initAdminForm() {
+      const tokenInput = document.getElementById("ghTokenInput");
+      const saveTokenBtn = document.getElementById("saveTokenBtn");
+      const tokenStatus = document.getElementById("tokenStatus");
+
+      const savedToken = localStorage.getItem("gh_pat_token");
+      if (savedToken) {
+        tokenStatus.textContent = "✅ Đã lưu";
+        tokenStatus.style.color = "#16a34a";
+        tokenInput.value = savedToken;
+      }
+
+      saveTokenBtn.addEventListener("click", () => {
+        const val = tokenInput.value.trim();
+        if (val) {
+          localStorage.setItem("gh_pat_token", val);
+          tokenStatus.textContent = "✅ Đã lưu";
+          tokenStatus.style.color = "#16a34a";
+          alert("Đã lưu token thành công vào trình duyệt!");
+          validateReady();
+        }
+      });
+
+      // FILE DROP ZONE
+      const dropZone = document.getElementById("dropZone");
+      const fileInput = document.getElementById("fileInput");
+
+      dropZone.addEventListener("click", () => fileInput.click());
+      dropZone.addEventListener("dragover", (e) => { e.preventDefault(); dropZone.classList.add("dragover"); });
+      dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
+      dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropZone.classList.remove("dragover");
+        if (e.dataTransfer.files.length > 0) {
+          handleFile(e.dataTransfer.files[0]);
+        }
+      });
+      fileInput.addEventListener("change", (e) => {
+        if (e.target.files.length > 0) {
+          handleFile(e.target.files[0]);
+        }
+      });
+
+      // APP SELECT & VERSION INPUT
+      const appSelect = document.getElementById("appSelect");
+      const versionInput = document.getElementById("versionInput");
+
+      appSelect.addEventListener("change", () => {
+        const isCustom = appSelect.value === "custom";
+        document.getElementById("customAppGroup").style.display = isCustom ? "block" : "none";
+        updateTag();
+      });
+
+      versionInput.addEventListener("input", updateTag);
+      document.getElementById("customSlug").addEventListener("input", updateTag);
+
+      function updateTag() {
+        let app = appSelect.value === "custom" ? (document.getElementById("customSlug").value.trim() || "app") : appSelect.value;
+        let ver = versionInput.value.trim();
+        if (ver && !ver.startsWith("v")) ver = "v" + ver;
+        document.getElementById("tagInput").value = ver ? `${app}-${ver}` : "";
+        validateReady();
+      }
+
+      function handleFile(file) {
+        if (!file.name.toLowerCase().endsWith(".apk")) {
+          alert("Vui lòng chỉ chọn file có đuôi .apk!");
+          return;
+        }
+        selectedFile = file;
+        document.getElementById("infoFileName").textContent = file.name;
+        document.getElementById("infoFileSize").textContent = (file.size / (1024 * 1024)).toFixed(1) + " MB";
+        document.getElementById("fileInfoBox").style.display = "block";
+
+        // Tự đoán tên app & version từ tên file
+        const fLower = file.name.toLowerCase();
+        if (fLower.includes("smartcall")) {
+          appSelect.value = "vnsmartcall";
+        } else if (fLower.includes("mydts") || fLower.includes("dts")) {
+          appSelect.value = "mydts";
+        } else if (fLower.includes("poscake")) {
+          appSelect.value = "poscake";
+        }
+
+        // Tự tìm số version trong tên file nếu có (vd: v1.0 hoặc 1.0)
+        const matchVer = file.name.match(/\d+\.\d+(\.\d+)?/);
+        if (matchVer && !versionInput.value) {
+          versionInput.value = matchVer[0];
+        }
+        updateTag();
+      }
+
+      function validateReady() {
+        const hasToken = !!localStorage.getItem("gh_pat_token");
+        const hasFile = !!selectedFile;
+        const hasTag = !!document.getElementById("tagInput").value;
+        document.getElementById("uploadBtn").disabled = !(hasToken && hasFile && hasTag);
+      }
+
+      // UPLOAD RELEASE LOGIC
+      document.getElementById("uploadBtn").addEventListener("click", uploadRelease);
+    }
+
+    async function uploadRelease() {
+      const token = localStorage.getItem("gh_pat_token");
+      if (!token) {
+        alert("Vui lòng lưu GitHub Token trước khi phát hành!");
+        return;
+      }
+
+      const uploadBtn = document.getElementById("uploadBtn");
+      const statusMsg = document.getElementById("statusMsg");
+      const progressBar = document.getElementById("progressBar");
+      const progressFill = document.getElementById("progressFill");
+
+      uploadBtn.disabled = true;
+      progressBar.style.display = "block";
+      progressFill.style.width = "20%";
+      statusMsg.className = "status-msg";
+      statusMsg.textContent = "⏳ Đang tạo bản Release trên GitHub...";
+
+      const tagName = document.getElementById("tagInput").value.trim();
+      const appSelect = document.getElementById("appSelect");
+      const appName = appSelect.options[appSelect.selectedIndex].text.split(" ")[0];
+      const ver = document.getElementById("versionInput").value.trim();
+      const changelog = document.getElementById("changelogInput").value.trim();
+
+      try {
+        // 1. Tạo Release trên GitHub
+        const relResp = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Accept": "application/vnd.github+json",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            tag_name: tagName,
+            name: `${appName} v${ver.replace(/^v/, '')}`,
+            body: changelog || `Bản cập nhật ${appName} phiên bản ${ver}`,
+            draft: false,
+            prerelease: false
+          })
+        });
+
+        if (!relResp.ok) {
+          const err = await relResp.json();
+          throw new Error(err.message || "Không thể tạo Release");
+        }
+
+        const relData = await relResp.json();
+        progressFill.style.width = "40%";
+        statusMsg.textContent = `🚀 Đang tải file APK (${(selectedFile.size / (1024*1024)).toFixed(1)} MB) lên GitHub...`;
+
+        // 2. Upload Binary Asset
+        // Endpoint: relData.upload_url (format: .../assets{?name,label})
+        const uploadUrl = relData.upload_url.replace(/\{(\?name,label|.*)\}/, `?name=${encodeURIComponent(selectedFile.name)}`);
+
+        // Upload trực tiếp dùng XMLHttpRequest để có % Progress
+        await new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open("POST", uploadUrl);
+          xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+          xhr.setRequestHeader("Content-Type", "application/vnd.android.package-archive");
+
+          xhr.upload.onprogress = (e) => {
+            if (e.lengthComputable) {
+              const percent = 40 + Math.round((e.loaded / e.total) * 55);
+              progressFill.style.width = `${percent}%`;
+              statusMsg.textContent = `🚀 Đang tải file lên GitHub: ${Math.round((e.loaded / e.total) * 100)}%...`;
+            }
+          };
+
+          xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              resolve(xhr.response);
+            } else {
+              reject(new Error("Lỗi khi upload asset: " + xhr.statusText));
+            }
+          };
+
+          xhr.onerror = () => reject(new Error("Lỗi kết nối mạng khi upload"));
+          xhr.send(selectedFile);
+        });
+
+        progressFill.style.width = "100%";
+        statusMsg.className = "status-msg success";
+        statusMsg.innerHTML = `🎉 <strong>Thành công!</strong> Đã phát hành bản ${tagName}.<br>Khách hàng có thể tải ngay trên trang chủ!`;
+        uploadBtn.disabled = false;
+
+      } catch (err) {
+        console.error(err);
+        progressFill.style.width = "0%";
+        progressBar.style.display = "none";
+        statusMsg.className = "status-msg error";
+        statusMsg.textContent = "❌ Lỗi: " + err.message;
+        uploadBtn.disabled = false;
+      }
+    }
+  
+
+    
+      if (sessionStorage.getItem("admin_auth") === "true") {
+        showAdminView();
+      }
+    }
+
     document.addEventListener("DOMContentLoaded", initPage);
+
+
   </script>
 </body>
 </html>
