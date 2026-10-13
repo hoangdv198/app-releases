@@ -1,0 +1,16 @@
+{
+  "name": "app-releases",
+  "version": "1.0.0",
+  "description": "App Releases Landing Page & Distribution Admin",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "apk",
+    "releases",
+    "distribution"
+  ],
+  "author": "hoangdv198",
+  "license": "ISC"
+}

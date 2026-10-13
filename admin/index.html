@@ -92,7 +92,12 @@
       <!-- STEP 2: GIAO DIỆN UPLOAD APP -->
       <div id="adminView" style="display: none;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-          <h1 style="font-size: 20px; margin: 0;">⚡ Phát Hành Ứng Dụng</h1>
+          <div>
+            <h1 style="font-size: 20px; margin: 0;">⚡ Phát Hành Ứng Dụng</h1>
+            <div id="localServerBadge" style="margin-top: 4px; font-size: 11px; color: #64748b; font-weight: 600;">
+              ⏳ Đang kiểm tra Local Server...
+            </div>
+          </div>
           <button id="logoutBtn" style="background: none; border: none; color: #ef4444; font-size: 13px; cursor: pointer; font-weight: 600;">Đăng xuất</button>
         </div>
 
@@ -288,6 +293,28 @@
       document.getElementById("adminView").style.display = "block";
       initAdminForm();
       loadReleasesList();
+      checkLocalServerStatus();
+      setInterval(checkLocalServerStatus, 5000);
+    }
+
+    async function checkLocalServerStatus() {
+      const badge = document.getElementById("localServerBadge");
+      if (!badge) return;
+      const isLocalHost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+      const endpoints = isLocalHost ? ["/api/health", "http://localhost:3303/api/health"] : ["http://localhost:3303/api/health"];
+
+      for (const hUrl of endpoints) {
+        try {
+          const res = await fetch(hUrl, { method: "GET", signal: AbortSignal.timeout(1000) });
+          if (res.ok) {
+            badge.innerHTML = "🟢 Local Server: Đã kết nối (Sẵn sàng upload)";
+            badge.style.color = "#16a34a";
+            return;
+          }
+        } catch (e) {}
+      }
+      badge.innerHTML = '🔴 Local Server: Chưa bật (Mở terminal: <code>npm start</code>)';
+      badge.style.color = "#dc2626";
     }
 
     document.getElementById("logoutBtn").addEventListener("click", () => {
@@ -731,9 +758,30 @@
 
         const uploadUrl = relData.upload_url.replace(/\{(\?name,label|.*)\}/, `?name=${encodeURIComponent(selectedFile.name)}`);
 
+        // Tìm proxy upload để bypass CORS
+        let proxyEndpoint = null;
+        const isLocalHost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+        const endpoints = isLocalHost ? ["/api/proxy-upload", "http://localhost:3303/api/proxy-upload"] : ["http://localhost:3303/api/proxy-upload"];
+
+        for (const ep of endpoints) {
+          try {
+            const hUrl = ep.replace("/proxy-upload", "/health");
+            const hRes = await fetch(hUrl, { method: "GET", signal: AbortSignal.timeout(1000) });
+            if (hRes.ok) {
+              proxyEndpoint = ep;
+              break;
+            }
+          } catch (e) {}
+        }
+
         await new Promise((resolve, reject) => {
           const xhr = new XMLHttpRequest();
-          xhr.open("POST", uploadUrl);
+          if (proxyEndpoint) {
+            xhr.open("POST", proxyEndpoint);
+            xhr.setRequestHeader("X-Upload-Url", uploadUrl);
+          } else {
+            xhr.open("POST", uploadUrl);
+          }
           xhr.setRequestHeader("Authorization", `Bearer ${token}`);
           xhr.setRequestHeader("Content-Type", "application/vnd.android.package-archive");
 
@@ -747,10 +795,16 @@
 
           xhr.onload = () => {
             if (xhr.status >= 200 && xhr.status < 300) resolve(xhr.response);
-            else reject(new Error("Lỗi khi upload asset: " + xhr.statusText));
+            else reject(new Error("Lỗi khi upload asset (HTTP " + xhr.status + "): " + (xhr.responseText || xhr.statusText)));
           };
 
-          xhr.onerror = () => reject(new Error("Lỗi kết nối mạng khi upload"));
+          xhr.onerror = () => {
+            if (!proxyEndpoint) {
+              reject(new Error("GitHub chặn CORS trình duyệt! Vui lòng mở Terminal chạy 'npm start' để upload."));
+            } else {
+              reject(new Error("Lỗi kết nối tới Local Server khi upload."));
+            }
+          };
           xhr.send(selectedFile);
         });
 
