@@ -204,6 +204,7 @@
   <script>
     const CORRECT_PIN = "686868";
     const GITHUB_REPO = "hoangdv198/app-releases";
+    const CLOUDFLARE_PROXY_URL = "https://dry-cherry-82ba.work-hoangdev.workers.dev";
     let selectedFile = null;
     let formInited = false;
 
@@ -293,13 +294,27 @@
       document.getElementById("adminView").style.display = "block";
       initAdminForm();
       loadReleasesList();
-      checkLocalServerStatus();
-      setInterval(checkLocalServerStatus, 5000);
+      checkProxyStatus();
+      setInterval(checkProxyStatus, 5000);
     }
 
-    async function checkLocalServerStatus() {
+    async function checkProxyStatus() {
       const badge = document.getElementById("localServerBadge");
       if (!badge) return;
+
+      // 1. Kiểm tra Cloudflare Worker trước
+      if (CLOUDFLARE_PROXY_URL) {
+        try {
+          const cfRes = await fetch(CLOUDFLARE_PROXY_URL, { method: "OPTIONS", signal: AbortSignal.timeout(2000) });
+          if (cfRes.ok) {
+            badge.innerHTML = "🟢 Cloud Proxy: Đã kết nối (Cloudflare Worker sẵn sàng)";
+            badge.style.color = "#16a34a";
+            return;
+          }
+        } catch (e) {}
+      }
+
+      // 2. Kiểm tra Local Server
       const isLocalHost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
       const endpoints = isLocalHost ? ["/api/health", "http://localhost:3303/api/health"] : ["http://localhost:3303/api/health"];
 
@@ -313,8 +328,8 @@
           }
         } catch (e) {}
       }
-      badge.innerHTML = '🔴 Local Server: Chưa bật (Mở terminal: <code>npm start</code>)';
-      badge.style.color = "#dc2626";
+      badge.innerHTML = '⚠️ Proxy chưa sẵn sàng (Bật terminal: <code>npm start</code>)';
+      badge.style.color = "#ea580c";
     }
 
     document.getElementById("logoutBtn").addEventListener("click", () => {
@@ -758,20 +773,30 @@
 
         const uploadUrl = relData.upload_url.replace(/\{(\?name,label|.*)\}/, `?name=${encodeURIComponent(selectedFile.name)}`);
 
-        // Tìm proxy upload để bypass CORS
+        // Tìm proxy upload để bypass CORS: ưu tiên Cloudflare Worker, sau đó Local Server
         let proxyEndpoint = null;
-        const isLocalHost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-        const endpoints = isLocalHost ? ["/api/proxy-upload", "http://localhost:3303/api/proxy-upload"] : ["http://localhost:3303/api/proxy-upload"];
 
-        for (const ep of endpoints) {
+        if (CLOUDFLARE_PROXY_URL) {
           try {
-            const hUrl = ep.replace("/proxy-upload", "/health");
-            const hRes = await fetch(hUrl, { method: "GET", signal: AbortSignal.timeout(1000) });
-            if (hRes.ok) {
-              proxyEndpoint = ep;
-              break;
-            }
+            const cfTest = await fetch(CLOUDFLARE_PROXY_URL, { method: "OPTIONS", signal: AbortSignal.timeout(1500) });
+            if (cfTest.ok) proxyEndpoint = CLOUDFLARE_PROXY_URL;
           } catch (e) {}
+        }
+
+        if (!proxyEndpoint) {
+          const isLocalHost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+          const endpoints = isLocalHost ? ["/api/proxy-upload", "http://localhost:3303/api/proxy-upload"] : ["http://localhost:3303/api/proxy-upload"];
+
+          for (const ep of endpoints) {
+            try {
+              const hUrl = ep.replace("/proxy-upload", "/health");
+              const hRes = await fetch(hUrl, { method: "GET", signal: AbortSignal.timeout(1000) });
+              if (hRes.ok) {
+                proxyEndpoint = ep;
+                break;
+              }
+            } catch (e) {}
+          }
         }
 
         await new Promise((resolve, reject) => {
